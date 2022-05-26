@@ -8,13 +8,13 @@ if [ $# -ne 1 ]; then
 fi
 
 # Execute the project with windows
-if [ "$1" = "windows" ]; then
-    java -cp bin;lib/jade.jar figbot.Figbot
+if [ "$1" = "w" ]; then
+    java -cp "bin;lib/jade.jar" figbot.Figbot
     exit 0
 fi
 
 # Execute the project with unix
-if [ "$1" = "unix" ]; then
+if [ "$1" = "u" ]; then
     java -cp bin:lib/jade.jar figbot.Figbot
     exit 0
 fi
