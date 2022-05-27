@@ -28,7 +28,7 @@ public class ReadMessage extends CyclicBehaviour {
 
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setType("");
+            sd.setType("recibir-mensajes");
             template.addServices(sd);
 
             try{
