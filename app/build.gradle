@@ -32,6 +32,12 @@ dependencies {
 
     // Logger
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
+
+    // Stanford NLP
+
+    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0'
+
+    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0', classifier: 'models'
 }
 
 apply plugin: "java"
@@ -39,7 +45,7 @@ apply plugin: "application"
 
 application {
     // Define the main class for the application.
-    mainClass = 'jade.Boot'
+    mainClass = 'figbot.App'
 }
 
 tasks.named('test') {

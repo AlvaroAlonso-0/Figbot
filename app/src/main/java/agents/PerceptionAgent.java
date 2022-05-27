@@ -1,7 +1,9 @@
 package agents;
 
+import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+//import java.util.logging.Logger;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.core.EventManager;
@@ -10,6 +12,7 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
+import auxiliar.ASCIIDrawings;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
 import jade.core.Agent;
@@ -18,15 +21,18 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import models.TwitchMessage;
 
 
-public class AgentePercepcion extends Agent{
+public class PerceptionAgent extends Agent{
     
     private TwitchClient twitchClient;
     private String[] channels;
     private Queue<ChannelMessageEvent> messages;
+    //private Logger log;
     
     protected void setup(){
         DFAgentDescription dfd = new DFAgentDescription();
@@ -49,14 +55,14 @@ public class AgentePercepcion extends Agent{
         .withChatAccount(new OAuth2Credential("twitch", "tg10oz4dgkypcs8ofa7swvohoiey3t"))
         .withDefaultEventHandler(SimpleEventHandler.class)
         .build();
-
+        
         Object[] args = getArguments();
         channels = new String[args.length];
         for(int i = 0; i < args.length; i++){
             channels[i] = args[i].toString();
         }
         messages = new LinkedBlockingQueue<>();
-
+        
         addBehaviour(new JoinChannels());
         addBehaviour(new ReadMessage());
         addBehaviour(new SendMessage(this));
@@ -76,7 +82,8 @@ public class AgentePercepcion extends Agent{
         public void action(){
             for (int i = 0; i < channels.length; i++){
                 twitchClient.getChat().joinChannel(channels[i]);
-                twitchClient.getChat().sendMessage(channels[i], "Ya estoy aquí");
+                twitchClient.getChat().sendMessage(channels[i], "Toma amogus crack");
+                twitchClient.getChat().sendMessage(channels[i], ASCIIDrawings.SMALL_AMOGUS);
             }
         }
     }
@@ -95,7 +102,7 @@ public class AgentePercepcion extends Agent{
     
     private class SendMessage extends CyclicBehaviour{
         private Agent myAgent;
-
+        
         public SendMessage(Agent myAgent){
             this.myAgent = myAgent;
         }
@@ -123,12 +130,25 @@ public class AgentePercepcion extends Agent{
             }
             if(processingAgents == null || processingAgents.length == 0) return;
             
-            ChannelMessageEvent message = messages.poll();
-          
-            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(myAgent.getAID());
-            //msg.setContent(message);
-            send(msg);
+            
+                
+                try {
+                    for(int i = 0; i < processingAgents.length; i++){
+                        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                        msg.addReceiver(processingAgents[i]);
+                        msg.setOntology("ontologia");
+                        msg.setLanguage(new SLCodec().getName());
+                        msg.setEnvelope(new Envelope());
+                        msg.getEnvelope().setPayloadEncoding("ISO8859_1");
+                        ChannelMessageEvent cme = messages.peek();
+                        msg.setContentObject(new TwitchMessage(cme.getChannel().getName(), cme.getUser().getName(), cme.getMessage()));
+                        send(msg);
+                    }
+                    messages.poll();
+                } catch (IOException e) {
+                    System.err.printf("No se pudo enviar el mensaje\n");
+                    e.printStackTrace();
+                }
         }
     }
 }

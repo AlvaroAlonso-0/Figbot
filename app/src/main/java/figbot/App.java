@@ -10,31 +10,35 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
-public class App {
+import jade.core.Runtime;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
+
+public class App extends SimpleEventHandler{
+
     public String getGreeting() {
         return "Hello World!";
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
 
-        OAuth2Credential credential = new OAuth2Credential("twitch", "tg10oz4dgkypcs8ofa7swvohoiey3t");
-        //CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
-        //credentialManager.registerIdentityProvider(new TwitchIdentityProvider(gp762nuuoqcoxypju8c569th9wz7q5, clientSecret, redirectUrl));
-        TwitchClient twitchClient = TwitchClientBuilder.builder()
-        .withEnableChat(true)
-        .withChatAccount(credential)
-        .withDefaultEventHandler(SimpleEventHandler.class)
-        .build();
-        //twitchClient.getChat().joinChannel("rayo106");
-        twitchClient.getChat().joinChannel("rayo106");
-        twitchClient.getChat().sendMessage("rayo106", "Holi chicos");
-        EventManager eventManager = twitchClient.getEventManager();
-        eventManager.onEvent(ChannelMessageEvent.class, event -> {
-            System.out.println("evento: " + event);
-            System.out.println("[" + event.getChannel().getName() + "] " + event.getUser().getName() + ": " + event.getMessage());
-            twitchClient.getChat().sendMessage(event.getChannel().getName(), "Hola " + event.getUser().getName() + "!");
-        });
-        //twitchClient.getChat().leaveChannel("rayo106");
+        Runtime runtime = jade.core.Runtime.instance();
+        Profile profile = new ProfileImpl();
+        AgentContainer container = runtime.createMainContainer(profile);
+        Object argsAgentPercepcion[] = {"rayo106"};
+        Object argsAgentProcesador[] = null;
+        try{
+            AgentController percepcion = container.createNewAgent("percepcion", "agents.PerceptionAgent", argsAgentPercepcion);
+            AgentController emotion = container.createNewAgent("procesadorEmotions", "agents.EmotionsProcessAgent", argsAgentProcesador);
+            AgentController command = container.createNewAgent("procesadorCommand", "agents.CommandProcessAgent", argsAgentProcesador);
+            percepcion.start();
+            emotion.start();
+            command.start();
+        } catch(StaleProxyException e){
+            e.printStackTrace();
+        }
     }
 }
