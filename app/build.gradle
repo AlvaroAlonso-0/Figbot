@@ -35,9 +35,8 @@ dependencies {
 
     // Stanford NLP
 
-    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0'
-
-    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0', classifier: 'models'
+    //implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0'
+    //implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0', classifier: 'models'
 }
 
 apply plugin: "java"

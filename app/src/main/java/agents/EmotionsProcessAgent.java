@@ -4,10 +4,12 @@ import java.util.Properties;
 
 import behaviours.ReceiveMessage;
 import behaviours.SendMessage;
+/*
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+*/
 import jade.content.lang.sl.SLCodec;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -15,11 +17,13 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import models.ActionData;
 import models.TwitchMessageHolder;
 
 public class EmotionsProcessAgent extends Agent{
 
     protected TwitchMessageHolder holder;
+    private ActionData actionData;
  
     @Override
     protected void setup(){
@@ -38,9 +42,10 @@ public class EmotionsProcessAgent extends Agent{
             System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
         }
         holder = new TwitchMessageHolder();
+        actionData = new ActionData();
         addBehaviour(new ReceiveMessage(this,holder));
         addBehaviour(new ProcessMessage());
-        addBehaviour(new SendMessage(this,holder));
+        addBehaviour(new SendMessage(this,actionData));
     }
 
     private class ProcessMessage extends CyclicBehaviour {
@@ -49,11 +54,12 @@ public class EmotionsProcessAgent extends Agent{
         public void action() {
             if (holder.getMessage() != null){
                 //System.out.println(holder.getMessage());
-                analisis(holder.getMessage().getMessage());
+                //analisis(holder.getMessage().getMessage());
                 holder.setMessage(null); 
             }
         }
 
+        /*
         private void analisis(String mensaje){
             Properties pipelineProps = new Properties();
             Properties tokenizerProps = new Properties();
@@ -72,5 +78,6 @@ public class EmotionsProcessAgent extends Agent{
                     System.out.println(output);
             }
         }
+        */
     }
 }

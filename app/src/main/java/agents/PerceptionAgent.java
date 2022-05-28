@@ -13,6 +13,7 @@ import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
 import auxiliar.ASCIIDrawings;
+import auxiliar.Constants;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
 import jade.core.Agent;
@@ -32,6 +33,7 @@ public class PerceptionAgent extends Agent{
     private TwitchClient twitchClient;
     private String[] channels;
     private Queue<ChannelMessageEvent> messages;
+    public static final String BOT_NAME = "figb0t";
     //private Logger log;
     
     protected void setup(){
@@ -52,7 +54,7 @@ public class PerceptionAgent extends Agent{
         
         twitchClient = TwitchClientBuilder.builder()
         .withEnableChat(true)
-        .withChatAccount(new OAuth2Credential("twitch", "tg10oz4dgkypcs8ofa7swvohoiey3t"))
+        .withChatAccount(new OAuth2Credential("twitch", Constants.Tokens.ACCESS_TOKEN))
         .withDefaultEventHandler(SimpleEventHandler.class)
         .build();
         
@@ -82,8 +84,6 @@ public class PerceptionAgent extends Agent{
         public void action(){
             for (int i = 0; i < channels.length; i++){
                 twitchClient.getChat().joinChannel(channels[i]);
-                twitchClient.getChat().sendMessage(channels[i], "Toma amogus crack");
-                twitchClient.getChat().sendMessage(channels[i], ASCIIDrawings.SMALL_AMOGUS);
             }
         }
     }
@@ -93,9 +93,11 @@ public class PerceptionAgent extends Agent{
         public void action() {
             EventManager eventManager = twitchClient.getEventManager();
             eventManager.onEvent(ChannelMessageEvent.class, event -> {
-                System.out.println("[" + event.getChannel().getName() + "] " + event.getUser().getName() + ": " + event.getMessage());//TODO
-                messages.add(event);
-                doWake();
+                if (!event.getUser().getName().equals(BOT_NAME)) {
+                    messages.add(event);
+                    System.out.println("[" + event.getChannel().getName() + "] " + event.getUser().getName() + ": " + event.getMessage()); //TODO
+                    doWake();
+                }
             });           
         }
     }
@@ -129,9 +131,6 @@ public class PerceptionAgent extends Agent{
                 fe.printStackTrace();
             }
             if(processingAgents == null || processingAgents.length == 0) return;
-            
-            
-                
                 try {
                     for(int i = 0; i < processingAgents.length; i++){
                         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);

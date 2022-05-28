@@ -1,6 +1,6 @@
 package agents;
 
-import auxiliar.ASCIIDrawings;
+import auxiliar.Constants;
 import behaviours.ReceiveMessage;
 import behaviours.SendMessage;
 import jade.content.lang.sl.SLCodec;
@@ -10,13 +10,15 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import models.TwitchMessage;
+import models.ActionData;
+
 import models.TwitchMessageHolder;
 
 public class CommandProcessAgent extends Agent{
 
     private static final String  COMMAND_TOKEN = "f!";
     protected TwitchMessageHolder holder;
+    private ActionData actionData;
     
  
     @Override
@@ -36,9 +38,11 @@ public class CommandProcessAgent extends Agent{
             System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
         }
         holder = new TwitchMessageHolder();
+        actionData = new ActionData();
+        
         addBehaviour(new ReceiveMessage(this,holder));
         addBehaviour(new ProcessMessage());
-        addBehaviour(new SendMessage(this,holder));
+        addBehaviour(new SendMessage(this,actionData));
     }
 
     private class ProcessMessage extends CyclicBehaviour {
@@ -46,27 +50,47 @@ public class CommandProcessAgent extends Agent{
         @Override
         public void action() {
             if (holder.getMessage() != null){
-                //System.out.println(holder.getMessage());
-                processCommand(holder.getMessage());
+                int action = processCommand(holder.getMessage().getMessage());
+                actionData.setAction(action);
+                actionData.setMessage(holder.getMessage());
                 holder.setMessage(null); 
             }
         }
 
-        private void processCommand(TwitchMessage twitchMessage){
-            if (!twitchMessage.getMessage().matches("^" + COMMAND_TOKEN + "[\\s\\S]+")) return;
-
-            String msg = twitchMessage.getMessage().split(" ")[0].substring(2);
+        private int processCommand(String message){
+            if (!message.matches("^" + COMMAND_TOKEN + "[\\s\\S]+")) return Constants.Code.ERROR;
+            
+            String [] splited_msg = message.split(" ");
+            String msg = splited_msg[0].substring(2);
             System.out.println(msg);
 
-            String ret = null;
+            int ret;
             switch(msg){
-                case "saludo" : break;
-                case "amogus" : ret = ASCIIDrawings.SMALL_AMOGUS;
-                                break;
-                default: ret = "Este comando no existe";
+                case Constants.Commands.GREETINGS : 
+                    if (splited_msg.length == 1) {
+                        ret = Constants.Code.GREETINGS_SELF;
+                    }
+                    else{
+                        ret = Constants.Code.GREETINGS_USER;
+                        actionData.setArgument(splited_msg[1]);
+                    }
+                    break;
+                case Constants.Commands.SHOUTOUT : ret = Constants.Code.SHOUTOUT; actionData.setArgument(splited_msg[1]); break;
+                case Constants.Commands.DICE  :
+                    if (splited_msg.length == 1){
+                        ret = Constants.Code.DICE_DEFAULT;
+                    }
+                    else {
+                        ret = Constants.Code.DICE_N;
+                        actionData.setArgument(splited_msg[1]);
+                    }
+                    break;
+                case Constants.Commands.TIME  : ret = Constants.Code.TIME; break;
+                case Constants.Commands.SUBS  : ret = Constants.Code.SUBS; break;
+                case Constants.Commands.TITLE : ret = Constants.Code.TITLE; break;
+                default: ret = Constants.Code.ERROR;
             }
-
-            System.out.println(ret);
+            return ret;
         }
     }
 }

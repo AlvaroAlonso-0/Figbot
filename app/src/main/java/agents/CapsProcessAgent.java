@@ -1,5 +1,6 @@
 package agents;
 
+import auxiliar.Constants;
 import behaviours.ReceiveMessage;
 import behaviours.SendMessage;
 import jade.content.lang.sl.SLCodec;
@@ -9,11 +10,14 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+
+import models.ActionData;
 import models.TwitchMessageHolder;
 
 public class CapsProcessAgent extends Agent{
 
     protected TwitchMessageHolder holder;
+    private ActionData actionData;
  
     @Override
     protected void setup(){
@@ -32,9 +36,10 @@ public class CapsProcessAgent extends Agent{
             System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
         }
         holder = new TwitchMessageHolder();
+        actionData = new ActionData();
         addBehaviour(new ReceiveMessage(this,holder));
         addBehaviour(new ProcessMessage());
-        addBehaviour(new SendMessage(this,holder));
+        addBehaviour(new SendMessage(this,actionData));
     }
 
     private class ProcessMessage extends CyclicBehaviour {
@@ -43,14 +48,15 @@ public class CapsProcessAgent extends Agent{
         public void action() {
             if (holder.getMessage() != null){
                 if(exceedsCapsLimit(holder.getMessage().getMessage())){
-                    System.out.println("Demasiadas mayusculas: " + holder.getMessage().getMessage().substring(0, 20));
+                    actionData.setMessage(holder.getMessage());
+                    actionData.setAction(Constants.Code.CAPS_ALERT);
                 }
-                holder.setMessage(null); 
+                holder.setMessage(null);
             }
         }
 
         private boolean exceedsCapsLimit(String message){
-            if(message.length() < 20) return false;
+            if(message.length() < 15) return false;
             int limit = (message.length() <= 40) ? 75 : 60;
             int caps = 0;
             for(int i = 0; i < message.length(); i++){
