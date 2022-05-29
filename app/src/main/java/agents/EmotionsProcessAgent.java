@@ -1,15 +1,22 @@
 package agents;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 
+import auxiliar.Constants;
 import behaviours.ReceiveMessage;
 import behaviours.SendMessage;
-/*
+
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
-*/
+
 import jade.content.lang.sl.SLCodec;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -24,6 +31,7 @@ public class EmotionsProcessAgent extends Agent{
 
     protected TwitchMessageHolder holder;
     private ActionDataMessage actionData;
+    private Set<String> swearWords;
  
     @Override
     protected void setup(){
@@ -43,9 +51,26 @@ public class EmotionsProcessAgent extends Agent{
         }
         holder = new TwitchMessageHolder();
         actionData = new ActionDataMessage();
+        fillSwearWords();
         addBehaviour(new ReceiveMessage(this,holder));
         addBehaviour(new ProcessMessage());
         addBehaviour(new SendMessage(this,actionData));
+    }
+
+    private void fillSwearWords(){
+        swearWords = new LinkedHashSet<>();
+        BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader("src/main/resources/swearwords.txt"));
+			String line = reader.readLine();
+			while (line != null) {
+				swearWords.add(line);
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     private class ProcessMessage extends CyclicBehaviour {
@@ -54,13 +79,34 @@ public class EmotionsProcessAgent extends Agent{
         public void action() {
             if (holder.getMessage() != null){
                 //System.out.println(holder.getMessage());
-                //analisis(holder.getMessage().getMessage());
+                int length = holder.getMessage().getMessage().split(" ").length;
+                int ratio = ratioSwearWord(holder.getMessage().getMessage(),length);
+                int ratioLimit;
+                if (length <= 3){
+                    ratioLimit = 50;
+                }
+                else if (length <= 10){
+                    ratioLimit = 40;
+                }
+                else {
+                    ratioLimit = 30;
+                }
+                if (ratio >= ratioLimit){
+                    System.out.println("ban");
+                }
+                else if (ratio >= 10){
+                    if (analisis(holder.getMessage().getMessage())){
+                        System.out.println("ban + analisis");
+                    }
+                    else {
+                        System.out.println("timeout");
+                    }
+                }
                 holder.setMessage(null); 
             }
         }
-
-        /*
-        private void analisis(String mensaje){
+  
+        private boolean analisis(String mensaje){
             Properties pipelineProps = new Properties();
             Properties tokenizerProps = new Properties();
             pipelineProps.setProperty("annotators", "parse, sentiment");
@@ -73,11 +119,23 @@ public class EmotionsProcessAgent extends Agent{
             pipeline.annotate(annotation);
             // normal output
             for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-                String output = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
-                if(!"Neutral".equals(output))
-                    System.out.println(output);
+                System.out.println(sentence.get(SentimentCoreAnnotations.SentimentClass.class));
+                if("Very negative".equals(sentence.get(SentimentCoreAnnotations.SentimentClass.class))){
+                    return true;
+                }
             }
+            return false;
         }
-        */
+
+        private int ratioSwearWord(String message, int length){
+            int nSwearWords = 0;
+            for (String word : swearWords){
+                if (message.contains(word)) {
+                    nSwearWords++;
+                }
+            }
+            return nSwearWords*100/length;
+        }
+
     }
 }

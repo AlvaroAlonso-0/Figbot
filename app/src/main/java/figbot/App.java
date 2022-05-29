@@ -38,7 +38,7 @@ public class App extends SimpleEventHandler{
             AgentController display = container.createNewAgent("visualizacion", "agents.DisplayAgent", argsAgentProcesador);
             AgentController helix = container.createNewAgent("moderador", "agents.HelixAgent", argsAgentPercepcion);
             percepcion.start();
-            //emotion.start();
+            emotion.start();
             command.start();
             caps.start();
             display.start();

@@ -94,7 +94,6 @@ public class PerceptionAgent extends Agent{
             eventManager.onEvent(ChannelMessageEvent.class, event -> {
                 if (!event.getUser().getName().equals(BOT_NAME)) {
                     messages.add(event);
-                    System.out.println("MENSAJE: " + event);
                     System.out.println("[" + event.getChannel().getName() + "] " + event.getUser().getName() + ": " + event.getMessage()); //TODO
                     doWake();
                 }

@@ -20,7 +20,6 @@ import com.github.twitch4j.TwitchClientBuilder;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
-import models.TwitchMessage;
 import auxiliar.Constants;
 import jade.content.lang.sl.SLCodec;
 

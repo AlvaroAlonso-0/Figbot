@@ -62,7 +62,6 @@ public class CommandProcessAgent extends Agent{
             
             String [] splited_msg = message.split(" ");
             String msg = splited_msg[0].substring(2);
-            System.out.println(msg);
 
             int ret;
             switch(msg){
