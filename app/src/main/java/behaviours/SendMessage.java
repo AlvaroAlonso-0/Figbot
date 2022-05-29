@@ -28,10 +28,10 @@ public class SendMessage extends CyclicBehaviour{
     
     @Override
     public void action() {
-        if (actionData.getAction() == Constants.Code.ERROR || actionData.getMessage() == null) return;
+        if (actionData.getAction() == Constants.Code.ERROR) return;
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("mostrar-mensajes");
+        sd.setType("visualizar-acciones");
         template.addServices(sd);
         AID[] processingAgents = null;
         try{
@@ -56,7 +56,6 @@ public class SendMessage extends CyclicBehaviour{
                 
                 myAgent.send(msg);
             }
-            actionData.setMessage(null);
             actionData.setAction(Constants.Code.ERROR);
         } catch (IOException e) {
             System.err.printf("No se pudo enviar el mensaje\n");

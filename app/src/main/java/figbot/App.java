@@ -36,11 +36,13 @@ public class App extends SimpleEventHandler{
             AgentController command = container.createNewAgent("procesadorCommand", "agents.CommandProcessAgent", argsAgentProcesador);
             AgentController caps = container.createNewAgent("procesadorCaps", "agents.CapsProcessAgent", argsAgentProcesador);
             AgentController display = container.createNewAgent("visualizacion", "agents.DisplayAgent", argsAgentProcesador);
+            AgentController helix = container.createNewAgent("moderador", "agents.HelixAgent", argsAgentPercepcion);
             percepcion.start();
             //emotion.start();
             command.start();
             caps.start();
             display.start();
+            helix.start();
         } catch(StaleProxyException e){
             e.printStackTrace();
         }

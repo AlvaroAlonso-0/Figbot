@@ -11,14 +11,14 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import models.ActionData;
-
+import models.ActionDataMessage;
 import models.TwitchMessageHolder;
 
 public class CommandProcessAgent extends Agent{
 
     private static final String  COMMAND_TOKEN = "f!";
     protected TwitchMessageHolder holder;
-    private ActionData actionData;
+    private ActionDataMessage actionData;
     
  
     @Override
@@ -38,7 +38,7 @@ public class CommandProcessAgent extends Agent{
             System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
         }
         holder = new TwitchMessageHolder();
-        actionData = new ActionData();
+        actionData = new ActionDataMessage();
         
         addBehaviour(new ReceiveMessage(this,holder));
         addBehaviour(new ProcessMessage());

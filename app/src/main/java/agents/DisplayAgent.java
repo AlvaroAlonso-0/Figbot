@@ -10,6 +10,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import models.ActionData;
+import models.ActionDataMessage;
+import models.ActionDataModeration;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.simple.SimpleEventHandler;
@@ -18,6 +20,7 @@ import com.github.twitch4j.TwitchClientBuilder;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
+import models.TwitchMessage;
 import auxiliar.Constants;
 import jade.content.lang.sl.SLCodec;
 
@@ -32,8 +35,8 @@ public class DisplayAgent extends Agent {
         dfd.setName(getAID());
 
         ServiceDescription sd = new ServiceDescription();
-        sd.setName("visualizador-de-mensajes");
-        sd.setType("mostrar-mensajes");
+        sd.setName("visualizador-de-acciones");
+        sd.setType("visualizar-acciones");
         sd.addLanguages(new SLCodec().getName());
         dfd.addServices(sd);
         try{
@@ -76,32 +79,34 @@ public class DisplayAgent extends Agent {
         @Override
         public void action() {
             if (actionData.getAction() == Constants.Code.ERROR) return;
-            String message;
             switch(actionData.getAction()/100){
                 case 1:
-                    message = userResponse(actionData.getAction()%100);
+                    writeOnChat(userResponse(actionData.getAction()%100));
                     break;
                 case 2:
-                    message = dice(actionData.getAction()%100);
+                    writeOnChat(dice(actionData.getAction()%100));
                     break;
                 case 3:
-                    message = streamInfo(actionData.getAction()%100);
+                    writeOnChat(streamInfo(actionData.getAction()%100));
                     break;
-                default:
-                    message = "";
-                    break;
+                case 9:
+                    System.out.println(((ActionDataModeration) actionData).getMessage());
             }
-            twitchClient.getChat().sendMessage(actionData.getMessage().getChannelName(), message);
-            
+        }
+
+        private void writeOnChat(String message){
+            twitchClient.getChat().sendMessage( ((ActionDataMessage) actionData).getMessage().getChannelName(), message);
         }
 
 
         private String userResponse(int code) {
             int n = (int)(Math.random()*GREETINGS_MESSAGES.length);
             String res;
+            ActionDataMessage message = (ActionDataMessage) actionData;
             switch(code/10){
-                case 0: res = String.format(GREETINGS_MESSAGES[n], code%10 == 1 ? actionData.getMessage().getUserName() : actionData.getArgument()); break;
-                case 1: res = String.format("Check out @%s channel! -> twitch.tv/%s",actionData.getArgument(),actionData.getArgument()); break;
+                case 0: res = String.format(GREETINGS_MESSAGES[n], code%10 == 1 ? (message.getMessage().getUserName()) : message.getArgument()); break;
+                case 1: res = String.format("Check out @%s channel! -> twitch.tv/%s", message.getArgument(), message.getArgument()); break;
+                case 2: res = String.format("Please @%s, do not use a lot of caps",message.getMessage().getUserName()); break;
                 default: res = "";
             }
             return res;
@@ -109,16 +114,18 @@ public class DisplayAgent extends Agent {
 
 
         private String dice(int i) {
-            int sides = i==1 ? 6 : Integer.parseInt(actionData.getArgument());
-            return String.format("@%s, you got the number %s",actionData.getMessage().getUserName(), String.valueOf(1+(int)(Math.random()*sides)));
+            ActionDataMessage message = (ActionDataMessage) actionData;
+            int sides = i==1 ? 6 : Integer.parseInt(message.getArgument());
+            return String.format("@%s, you got the number %s",message.getMessage().getUserName(), String.valueOf(1+(int)(Math.random()*sides)));
         }
 
         private String streamInfo(int code){
             String res;
+            ActionDataMessage message = (ActionDataMessage) actionData;
             switch(code){
                 case 1:
                     LocalTime now = LocalTime.now(ZoneId.of(timeZone));
-                    res = String.format("@%s Local time is %d:%d",actionData.getMessage().getChannelName(),now.getHour(),now.getMinute());
+                    res = String.format("@%s Local time is %d:%d",message.getMessage().getChannelName(),now.getHour(),now.getMinute());
                     break;   
                 case 11:
                 default:
