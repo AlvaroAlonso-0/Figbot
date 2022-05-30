@@ -39,5 +39,13 @@ public class Constants {
         
         public static final int ERROR = 0;
     }
-    
+
+    public class Message{
+        public static final String BAN = "has banned";
+        public static final String UNBAN = "has unbanned";
+        public static final String TIMEOUT = "has timeouted";
+        public static final String DELETE = "deleted the message from";
+        public static final String SLOW = "slowed the chat";
+        public static final String SLOW_OFF = "disabled slow mode";
+    }
 }

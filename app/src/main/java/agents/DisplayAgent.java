@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -12,6 +13,7 @@ import jade.lang.acl.UnreadableException;
 import models.ActionData;
 import models.ActionDataMessage;
 import models.ActionDataModeration;
+import models.DisplayInfo;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.simple.SimpleEventHandler;
@@ -21,18 +23,19 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 
 import auxiliar.Constants;
+import figbot.App;
 import jade.content.lang.sl.SLCodec;
 
 public class DisplayAgent extends Agent {
-
+    
     private ActionData actionData;
     private String timeZone = "Europe/Paris";
-
+    
     @Override
     protected void setup(){
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
-
+        
         ServiceDescription sd = new ServiceDescription();
         sd.setName("visualizador-de-acciones");
         sd.setType("visualizar-acciones");
@@ -45,27 +48,28 @@ public class DisplayAgent extends Agent {
         }
         addBehaviour(new ReceiveMessage());
         addBehaviour(new SendChatToTwitch());
-        //addBehaviour(new SendMessage(this,actionData));
+        addBehaviour(new ChatToGUI());
+        addBehaviour(new Reset());
     }
-
+    
     public class ReceiveMessage extends CyclicBehaviour{
-            
+        
         @Override
         public void action() {
             ACLMessage msg = myAgent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchOntology("ontologia")));
             try {
-                 actionData = (ActionData)msg.getContentObject();
+                actionData = (ActionData)msg.getContentObject();
             } catch (UnreadableException e) {
                 e.printStackTrace();
             }
         }
     }
-
+    
     public class SendChatToTwitch extends CyclicBehaviour{
-
+        
         private final String [] GREETINGS_MESSAGES = {"Greetings @%s! Enjoy the show", "Hello @%s! Have a good time watching the stream", "What's up @%s? Thank you for watching the live"}; 
         private TwitchClient twitchClient;
-
+        
         public SendChatToTwitch(){
             twitchClient = TwitchClientBuilder.builder()
             .withEnableChat(true)
@@ -73,31 +77,26 @@ public class DisplayAgent extends Agent {
             .withDefaultEventHandler(SimpleEventHandler.class)
             .build();
         }
-
-
+        
+        
         @Override
         public void action() {
-            if (actionData.getAction() == Constants.Code.ERROR) return;
+            if (actionData.getAction() >= Constants.Code.BAN || actionData.getAction() == Constants.Code.ERROR ) return;
+            String message;
             switch(actionData.getAction()/100){
                 case 1:
-                    writeOnChat(userResponse(actionData.getAction()%100));
-                    break;
+                message = userResponse(actionData.getAction()%100);
+                break;
                 case 2:
-                    writeOnChat(dice(actionData.getAction()%100));
-                    break;
-                case 3:
-                    writeOnChat(streamInfo(actionData.getAction()%100));
-                    break;
-                case 9:
-                    System.out.println(((ActionDataModeration) actionData).getMessage());
+                message = dice(actionData.getAction()%100);
+                break;
+                default://case 3:
+                message = streamInfo(actionData.getAction()%100);
+                break;
             }
-        }
-
-        private void writeOnChat(String message){
             twitchClient.getChat().sendMessage( ((ActionDataMessage) actionData).getMessage().getChannelName(), message);
-        }
-
-
+        }        
+        
         private String userResponse(int code) {
             int n = (int)(Math.random()*GREETINGS_MESSAGES.length);
             String res;
@@ -110,36 +109,106 @@ public class DisplayAgent extends Agent {
             }
             return res;
         }
-
-
+        
+        
         private String dice(int i) {
             ActionDataMessage message = (ActionDataMessage) actionData;
             int sides = i==1 ? 6 : Integer.parseInt(message.getArgument());
             return String.format("@%s, you got the number %s",message.getMessage().getUserName(), String.valueOf(1+(int)(Math.random()*sides)));
         }
-
+        
         private String streamInfo(int code){
             String res;
             ActionDataMessage message = (ActionDataMessage) actionData;
             switch(code){
                 case 1:
-                    LocalTime now = LocalTime.now(ZoneId.of(timeZone));
-                    res = String.format("@%s Local time is %d:%d",message.getMessage().getChannelName(),now.getHour(),now.getMinute());
-                    break;   
+                LocalTime now = LocalTime.now(ZoneId.of(timeZone));
+                res = String.format("@%s Local time is %d:%d",message.getMessage().getChannelName(),now.getHour(),now.getMinute());
+                break;   
                 case 11:
+                //TODO
                 default:
-                    res = "";
-                    break;      
-              }
+                res = "";
+                break;      
+            }
             return res;
         }
     }
-
-    public class SendChatToGUI extends CyclicBehaviour {
-
+    
+    public class ChatToGUI extends CyclicBehaviour {
+        
         @Override
         public void action() {
-            
+            if (actionData.getAction() < Constants.Code.BAN || actionData.getAction() == Constants.Code.ERROR) return;
+            ActionDataModeration mod = (ActionDataModeration) actionData;
+            if(mod.getAction()/10 == 91){
+                
+                mod.setAction(mod.getAction()-10);
+            }
+            DisplayInfo displayInfo;
+            switch(mod.getAction()){
+                case Constants.Code.BAN: 
+                case Constants.Code.UNBAN: 
+                case Constants.Code.TIMEOUT:
+                case Constants.Code.DELETE: displayInfo = buildTARGET(mod,Constants.Message.DELETE);break;
+                case Constants.Code.SLOW: displayInfo = buildSLOW(mod, Constants.Message.SLOW);break;
+                case Constants.Code.SLOW_OFF: displayInfo = buildSLOW(mod, Constants.Message.SLOW_OFF);break;
+                default: return;
+            }
+            App.getController().displayModerationEvent(displayInfo);
+        }
+
+        //TODO
+        private DisplayInfo buildTARGET(ActionDataModeration mod, String message){
+            return new DisplayInfo(mod.getAction(), String.format("%s %s %s", mod.getModeration().getCreatedBy(), message, mod.getModeration().getTarget()));
+        }
+
+        private DisplayInfo buildSLOW(ActionDataModeration mod, String message){
+            return new DisplayInfo(mod.getAction(), String.format("%s %s", mod.getModeration().getCreatedBy(), message));
+        }
+        
+        private void askHelix(){
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType("moderar-canal");
+            template.addServices(sd);
+            AID[] processingAgents = null;
+            try{
+                DFAgentDescription[] result = DFService.search(myAgent, template);
+                processingAgents = new AID[result.length];
+                for(int i=0; i<result.length; i++){
+                    processingAgents[i] = result[i].getName();
+                }
+            } catch(FIPAException fe){
+                fe.printStackTrace();
+            }
+            if(processingAgents == null || processingAgents.length == 0) return;
+            try {
+                for(int i = 0; i < processingAgents.length; i++){
+                    ACLMessage msg = new ACLMessage(ACLMessage.);
+                    msg.addReceiver(processingAgents[i]);
+                    msg.setOntology("ontologia");
+                    msg.setLanguage(new SLCodec().getName());
+                    msg.setEnvelope(new Envelope());
+                    msg.getEnvelope().setPayloadEncoding("ISO8859_1");
+                    msg.setContentObject(actionData);
+                    
+                    myAgent.send(msg);
+                }
+                actionData.setAction(Constants.Code.ERROR);
+            } catch (IOException e) {
+                System.err.printf("No se pudo enviar el mensaje\n");
+                e.printStackTrace();
+            }
+        }
+        
+    }
+    
+    public class Reset extends CyclicBehaviour{
+        
+        @Override
+        public void action() {
+            actionData.setAction(Constants.Code.ERROR);
         }
         
     }
