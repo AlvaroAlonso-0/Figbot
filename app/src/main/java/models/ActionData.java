@@ -1,6 +1,5 @@
 package models;
 
-import auxiliar.Constants;
 import jade.util.leap.Serializable;
 
 public abstract class ActionData implements Serializable{

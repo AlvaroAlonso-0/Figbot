@@ -1,7 +1,6 @@
 package behaviours;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import auxiliar.Constants;
 import jade.content.lang.sl.SLCodec;
@@ -18,11 +17,10 @@ import models.ActionData;
 
 public class SendMessage extends CyclicBehaviour{
     
-    private Agent myAgent;
     private ActionData actionData;
     
     public SendMessage(Agent agent, ActionData actionData){
-        this.myAgent = agent;
+        super(agent);
         this.actionData = actionData;
     }
     

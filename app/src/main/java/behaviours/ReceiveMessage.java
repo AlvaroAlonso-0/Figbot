@@ -10,12 +10,11 @@ import models.TwitchMessageHolder;
 
 public class ReceiveMessage extends CyclicBehaviour{
 
-    private Agent myAgent;
     private TwitchMessageHolder holder;
 
     public ReceiveMessage(Agent agent,TwitchMessageHolder holder){
+        super(agent);
         this.holder = holder;
-        this.myAgent = agent;
     }
         
     @Override

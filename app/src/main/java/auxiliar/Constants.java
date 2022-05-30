@@ -34,6 +34,8 @@ public class Constants {
         public static final int DELETE = 905;
         public static final int SLOW = 906;
         public static final int SLOW_OFF = 907;
+        public static final int DO_BAN = 910;
+        public static final int DO_TIMEOUT = 912;
         
         public static final int ERROR = 0;
     }
