@@ -22,24 +22,39 @@ public class App{
     public static void main(String[] args) {
         controller = new Controller();
 
+        while(!controller.getStarted()){ // While initial menu isn't completed wait 
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("LLegamos");
+
         Runtime runtime = jade.core.Runtime.instance();
         Profile profile = new ProfileImpl();
         AgentContainer container = runtime.createMainContainer(profile);
-        Object argsAgentPercepcion[] = {"rayo106"};
+        Object argsAgentPercepcion[] = new Object[1];
+        argsAgentPercepcion[0] = controller.getChannelName();
         Object argsAgentProcesador[] = null;
         try{
             AgentController percepcion = container.createNewAgent("percepcion", "agents.PerceptionAgent", argsAgentPercepcion);
-            AgentController emotion = container.createNewAgent("procesadorEmotions", "agents.EmotionsProcessAgent", argsAgentProcesador);
             AgentController command = container.createNewAgent("procesadorCommand", "agents.CommandProcessAgent", argsAgentProcesador);
             AgentController caps = container.createNewAgent("procesadorCaps", "agents.CapsProcessAgent", argsAgentProcesador);
             AgentController display = container.createNewAgent("visualizacion", "agents.DisplayAgent", argsAgentProcesador);
-            AgentController helix = container.createNewAgent("moderador", "agents.HelixAgent", argsAgentPercepcion);
+
+            if(controller.getModeration()){
+                AgentController emotion = container.createNewAgent("procesadorEmotions", "agents.EmotionsProcessAgent", argsAgentProcesador);
+                AgentController helix = container.createNewAgent("moderador", "agents.HelixAgent", argsAgentPercepcion);
+                emotion.start();
+                helix.start();
+            }
+
             percepcion.start();
-            emotion.start();
             command.start();
             caps.start();
             display.start();
-            helix.start();
         } catch(StaleProxyException e){
             e.printStackTrace();
         }

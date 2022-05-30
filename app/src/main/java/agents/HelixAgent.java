@@ -96,6 +96,9 @@ public class HelixAgent extends Agent{
         public void action() {
             twitchClient.getPubSub().listenForModerationEvents(oauth, Constants.Tokens.USER_ID, "98803007");
             twitchClient.getEventManager().onEvent(ChatModerationEvent.class, event -> {
+                if (event.getData().getCreatedBy().equals("figb0t")){
+                    return;
+                }
                 System.out.println("Se ha realizado un: " + event.getData().getModerationAction().ordinal());
                 ActionDataModeration mod = new ActionDataModeration();
                 ModerationMessage message = new ModerationMessage();
@@ -110,7 +113,10 @@ public class HelixAgent extends Agent{
                 if (event.getData().getModerationAction().ordinal() == 2){
                     message.setTimeoutDuration(event.getData().getTimeoutDuration().isEmpty() ? 600 : event.getData().getTimeoutDuration().getAsInt());
                 }
-                mod.setMessage(message);
+                if(event.getData().getCreatedBy().equals("figb0t")){
+                    return;
+                }
+                mod.setModeration(message);
                 events.add(mod);
             });
         }

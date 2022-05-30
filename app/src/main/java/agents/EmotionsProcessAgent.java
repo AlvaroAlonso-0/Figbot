@@ -3,7 +3,6 @@ package agents;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -136,7 +135,7 @@ public class EmotionsProcessAgent extends Agent{
         private int ratioSwearWord(String message, int length){
             int nSwearWords = 0;
             for (String word : swearWords){
-                if (message.contains(word)) {
+                if (message.contains(word+" ")) {
                     nSwearWords++;
                 }
             }

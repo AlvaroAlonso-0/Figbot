@@ -10,7 +10,6 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import models.ActionData;
 import models.ActionDataMessage;
 import models.TwitchMessageHolder;
 

@@ -48,4 +48,13 @@ public class Constants {
         public static final String SLOW = "slowed the chat";
         public static final String SLOW_OFF = "disabled slow mode";
     }
+
+    public class Action {
+        public static final String BAN = "Ban";
+        public static final String UNBAN = "Unban";
+        public static final String TIMEOUT = "Timeout";
+        public static final String DELETE = "Delete";
+        public static final String SLOW = "Slow";
+        public static final String SLOW_OFF = "Slowoff";
+    }
 }

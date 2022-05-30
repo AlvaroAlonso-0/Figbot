@@ -3,7 +3,6 @@ package agents;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-//import java.util.logging.Logger;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.core.EventManager;
@@ -12,7 +11,6 @@ import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 
-import auxiliar.ASCIIDrawings;
 import auxiliar.Constants;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
@@ -94,7 +92,7 @@ public class PerceptionAgent extends Agent{
             eventManager.onEvent(ChannelMessageEvent.class, event -> {
                 if (!event.getUser().getName().equals(BOT_NAME)) {
                     messages.add(event);
-                    System.out.println("[" + event.getChannel().getName() + "] " + event.getUser().getName() + ": " + event.getMessage()); //TODO
+                    System.out.println("[" + event.getChannel().getName() + "] " + event.getUser().getName() + ": " + event.getMessage()); // TODO
                     doWake();
                 }
             });           

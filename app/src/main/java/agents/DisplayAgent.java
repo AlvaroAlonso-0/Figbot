@@ -6,6 +6,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -19,6 +20,8 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
+
+import java.io.IOException;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
@@ -149,7 +152,7 @@ public class DisplayAgent extends Agent {
             switch(mod.getAction()){
                 case Constants.Code.BAN: 
                 case Constants.Code.UNBAN: 
-                case Constants.Code.TIMEOUT:
+                case Constants.Code.TIMEOUT: 
                 case Constants.Code.DELETE: displayInfo = buildTARGET(mod,Constants.Message.DELETE);break;
                 case Constants.Code.SLOW: displayInfo = buildSLOW(mod, Constants.Message.SLOW);break;
                 case Constants.Code.SLOW_OFF: displayInfo = buildSLOW(mod, Constants.Message.SLOW_OFF);break;
@@ -185,7 +188,7 @@ public class DisplayAgent extends Agent {
             if(processingAgents == null || processingAgents.length == 0) return;
             try {
                 for(int i = 0; i < processingAgents.length; i++){
-                    ACLMessage msg = new ACLMessage(ACLMessage.);
+                    ACLMessage msg = new ACLMessage(ACLMessage.AGREE); // no sabemos si esto es asi, es para subirlo a git
                     msg.addReceiver(processingAgents[i]);
                     msg.setOntology("ontologia");
                     msg.setLanguage(new SLCodec().getName());
