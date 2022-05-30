@@ -3,27 +3,24 @@
  */
 package figbot;
 
-import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
-import com.github.philippheuer.events4j.core.EventManager;
-import com.github.philippheuer.events4j.simple.SimpleEventHandler;
-import com.github.twitch4j.TwitchClient;
-import com.github.twitch4j.TwitchClientBuilder;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-
 import jade.core.Runtime;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+import controller.Controller;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 
-public class App extends SimpleEventHandler{
+public class App{
 
-    public String getGreeting() {
-        return "Hello World!";
+    private static Controller controller;
+
+    public static Controller getController(){
+        return controller;
     }
 
     public static void main(String[] args) {
+        controller = new Controller();
 
         Runtime runtime = jade.core.Runtime.instance();
         Profile profile = new ProfileImpl();
