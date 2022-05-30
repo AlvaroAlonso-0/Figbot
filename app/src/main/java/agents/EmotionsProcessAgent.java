@@ -93,13 +93,19 @@ public class EmotionsProcessAgent extends Agent{
                 }
                 if (ratio >= ratioLimit){
                     System.out.println("ban");
+                    actionData.setAction(Constants.Code.BAN);
+                    actionData.setMessage(holder.getMessage());
                 }
                 else if (ratio >= 10){
                     if (analisis(holder.getMessage().getMessage())){
                         System.out.println("ban + analisis");
+                        actionData.setAction(Constants.Code.BAN);
+                        actionData.setMessage(holder.getMessage());
                     }
                     else {
                         System.out.println("timeout");
+                        actionData.setAction(Constants.Code.TIMEOUT);
+                        actionData.setMessage(holder.getMessage());
                     }
                 }
                 holder.setMessage(null); 
