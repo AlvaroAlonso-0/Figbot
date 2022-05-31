@@ -8,20 +8,20 @@ import jade.lang.acl.UnreadableException;
 import models.TwitchMessage;
 import models.TwitchMessageHolder;
 
-public class ReceiveMessage extends CyclicBehaviour{
+public class ReceiveTwitchMessage extends CyclicBehaviour{
 
     private TwitchMessageHolder holder;
 
-    public ReceiveMessage(Agent agent,TwitchMessageHolder holder){
+    public ReceiveTwitchMessage(Agent agent,TwitchMessageHolder holder){
         super(agent);
         this.holder = holder;
     }
         
     @Override
     public void action() {
-        ACLMessage msg = myAgent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchOntology("ontologia")));
+        ACLMessage msg = myAgent.blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
         try {
-             holder.setMessage((TwitchMessage)msg.getContentObject());
+             holder.setTwitchMessage((TwitchMessage)msg.getContentObject());
         } catch (UnreadableException e) {
             e.printStackTrace();
         }

@@ -1,15 +1,13 @@
 package agents;
 
-import auxiliar.Constants;
-import behaviours.ReceiveMessage;
-import behaviours.SendMessage;
-import jade.content.lang.sl.SLCodec;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
+
+import auxiliar.Constants;
+import auxiliar.Utils;
+import behaviours.ReceiveTwitchMessage;
+import behaviours.SendMessage;
+
 
 import models.ActionDataMessage;
 import models.TwitchMessageHolder;
@@ -21,23 +19,11 @@ public class CapsProcessAgent extends Agent{
  
     @Override
     protected void setup(){
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
+        Utils.registerService(this, "procesador-de-mayusculas", "procesar-mensajes");
 
-        ServiceDescription sd = new ServiceDescription();
-        sd.setName("procesador-de-mayusculas");
-        sd.setType("procesar-mensajes");
-        sd.addLanguages(new SLCodec().getName());
-        dfd.addServices(sd);
-
-        try{
-            DFService.register(this, dfd);
-        } catch(FIPAException e){
-            System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
-        }
         holder = new TwitchMessageHolder();
         actionData = new ActionDataMessage();
-        addBehaviour(new ReceiveMessage(this,holder));
+        addBehaviour(new ReceiveTwitchMessage(this,holder));
         addBehaviour(new ProcessMessage());
         addBehaviour(new SendMessage(this,actionData));
     }
@@ -46,12 +32,12 @@ public class CapsProcessAgent extends Agent{
 
         @Override
         public void action() {
-            if (holder.getMessage() != null){
-                if(exceedsCapsLimit(holder.getMessage().getMessage())){
-                    actionData.setMessage(holder.getMessage());
+            if (holder.getTwitchMessage() != null){
+                if(exceedsCapsLimit(holder.getTwitchMessage().getMessage())){
+                    actionData.setMessage(holder.getTwitchMessage());
                     actionData.setAction(Constants.Code.CAPS_ALERT);
                 }
-                holder.setMessage(null);
+                holder.setTwitchMessage(null);
             }
         }
 

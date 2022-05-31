@@ -33,6 +33,7 @@ public class DisplayGUI {
         events.addEvent(event);
     }
 
+    //TODO borrar?
     public static void main (String [] args){
         new DisplayGUI("rayo106", true);
     }

@@ -32,7 +32,7 @@ public class Controller {
         this.moderation = moderation;
         this.channelName = channelName;
         started = true;
-        System.out.printf("Moderation -> %s, ChannelName -> %s, Started -> %s\n", moderation, channelName, getStarted());
+        System.out.printf("Moderation -> %s, ChannelName -> %s, Started -> %s\n", moderation, channelName, getStarted());//TODO
         displayGui = new DisplayGUI(channelName, moderation);
     }
 
@@ -41,6 +41,7 @@ public class Controller {
         displayGui.newEvent(event);
     }
 
+    //TODO borrar?
     public static void main (String [] args){
         new Controller();
     }

@@ -8,11 +8,11 @@ public class TwitchMessageHolder {
         message = null;
     }
 
-    public TwitchMessage getMessage() {
+    public TwitchMessage getTwitchMessage() {
         return message;
     }
 
-    public void setMessage(TwitchMessage message) {
+    public void setTwitchMessage(TwitchMessage message) {
         this.message = message;
     }
     

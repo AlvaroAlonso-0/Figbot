@@ -1,45 +1,32 @@
 package agents;
 
-import auxiliar.Constants;
-import behaviours.ReceiveMessage;
-import behaviours.SendMessage;
-import jade.content.lang.sl.SLCodec;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
+
+import auxiliar.Constants;
+import auxiliar.Utils;
+import behaviours.ReceiveTwitchMessage;
+import behaviours.SendMessage;
 import models.ActionDataMessage;
 import models.TwitchMessageHolder;
 
 public class CommandProcessAgent extends Agent{
-
+    
     private static final String  COMMAND_TOKEN = "f!";
+    private static final int COMMAND_TOKEN_LENGTH = 2;
+
     protected TwitchMessageHolder holder;
     private ActionDataMessage actionData;
     
  
     @Override
     protected void setup(){
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
+        Utils.registerService(this, "procesador-de-comandos", "procesar-mensajes");
 
-        ServiceDescription sd = new ServiceDescription();
-        sd.setName("procesador-de-comandos");
-        sd.setType("procesar-mensajes");
-        sd.addLanguages(new SLCodec().getName());
-        dfd.addServices(sd);
-
-        try{
-            DFService.register(this, dfd);
-        } catch(FIPAException e){
-            System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
-        }
         holder = new TwitchMessageHolder();
         actionData = new ActionDataMessage();
         
-        addBehaviour(new ReceiveMessage(this,holder));
+        addBehaviour(new ReceiveTwitchMessage(this,holder));
         addBehaviour(new ProcessMessage());
         addBehaviour(new SendMessage(this,actionData));
     }
@@ -48,11 +35,10 @@ public class CommandProcessAgent extends Agent{
 
         @Override
         public void action() {
-            if (holder.getMessage() != null){
-                int action = processCommand(holder.getMessage().getMessage());
-                actionData.setAction(action);
-                actionData.setMessage(holder.getMessage());
-                holder.setMessage(null); 
+            if (holder.getTwitchMessage() != null){
+                actionData.setAction(processCommand(holder.getTwitchMessage().getMessage()));
+                actionData.setMessage(holder.getTwitchMessage());
+                holder.setTwitchMessage(null); 
             }
         }
 
@@ -60,15 +46,14 @@ public class CommandProcessAgent extends Agent{
             if (!message.matches("^" + COMMAND_TOKEN + "[\\s\\S]+")) return Constants.Code.ERROR;
             
             String [] splited_msg = message.split(" ");
-            String msg = splited_msg[0].substring(2);
+            String msg = splited_msg[0].substring(COMMAND_TOKEN_LENGTH);
 
             int ret;
             switch(msg){
                 case Constants.Commands.GREETINGS : 
                     if (splited_msg.length == 1) {
                         ret = Constants.Code.GREETINGS_SELF;
-                    }
-                    else{
+                    }else{
                         ret = Constants.Code.GREETINGS_USER;
                         actionData.setArgument(splited_msg[1]);
                     }
@@ -77,8 +62,7 @@ public class CommandProcessAgent extends Agent{
                 case Constants.Commands.DICE  :
                     if (splited_msg.length == 1){
                         ret = Constants.Code.DICE_DEFAULT;
-                    }
-                    else {
+                    }else {
                         ret = Constants.Code.DICE_N;
                         actionData.setArgument(splited_msg[1]);
                     }

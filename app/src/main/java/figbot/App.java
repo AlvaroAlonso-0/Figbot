@@ -7,9 +7,10 @@ import jade.core.Runtime;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
-import controller.Controller;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
+
+import controller.Controller;
 
 public class App{
 
@@ -30,6 +31,7 @@ public class App{
             }
         }
 
+        //TODO boton menu completado lanzar
         System.out.println("LLegamos");
 
         Runtime runtime = jade.core.Runtime.instance();

@@ -1,54 +1,39 @@
 package agents;
 
+import java.io.IOException;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
+import com.github.twitch4j.TwitchClient;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.Envelope;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+
+import auxiliar.Constants;
+import auxiliar.Utils;
 import models.ActionData;
 import models.ActionDataMessage;
 import models.ActionDataModeration;
 import models.DisplayInfo;
-
-import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
-import com.github.philippheuer.events4j.simple.SimpleEventHandler;
-import com.github.twitch4j.TwitchClient;
-import com.github.twitch4j.TwitchClientBuilder;
-
-import java.io.IOException;
-import java.time.LocalTime;
-import java.time.ZoneId;
-
-import auxiliar.Constants;
 import figbot.App;
-import jade.content.lang.sl.SLCodec;
 
 public class DisplayAgent extends Agent {
     
     private ActionData actionData;
-    private String timeZone = "Europe/Paris";
+    private String timeZone = "Europe/Paris";//TODO
     
     @Override
     protected void setup(){
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
+        Utils.registerService(this, "visualizador-de-acciones", "visualizar-acciones");
         
-        ServiceDescription sd = new ServiceDescription();
-        sd.setName("visualizador-de-acciones");
-        sd.setType("visualizar-acciones");
-        sd.addLanguages(new SLCodec().getName());
-        dfd.addServices(sd);
-        try{
-            DFService.register(this, dfd);
-        } catch(FIPAException e){
-            System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
-        }
+        //timeZone = getArguments()[0].toString(); //TODO
         addBehaviour(new ReceiveMessage());
         addBehaviour(new SendChatToTwitch());
         addBehaviour(new ChatToGUI());
@@ -59,7 +44,7 @@ public class DisplayAgent extends Agent {
         
         @Override
         public void action() {
-            ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchOntology("ontologia")));
+            ACLMessage msg = blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
             try {
                 actionData = (ActionData)msg.getContentObject();
             } catch (UnreadableException e) {
@@ -71,39 +56,30 @@ public class DisplayAgent extends Agent {
     public class SendChatToTwitch extends CyclicBehaviour{
         
         private final String [] GREETINGS_MESSAGES = {"Greetings @%s! Enjoy the show", "Hello @%s! Have a good time watching the stream", "What's up @%s? Thank you for watching the live"}; 
+
         private TwitchClient twitchClient;
         
         public SendChatToTwitch(){
-            twitchClient = TwitchClientBuilder.builder()
-            .withEnableChat(true)
-            .withChatAccount(new OAuth2Credential("twitch", Constants.Tokens.ACCESS_TOKEN))
-            .withDefaultEventHandler(SimpleEventHandler.class)
-            .build();
+            twitchClient = Utils.defaultTwitchBuilder(Utils.generateCredential()).build();
         }
-        
         
         @Override
         public void action() {
             if (actionData.getAction() >= Constants.Code.BAN || actionData.getAction() == Constants.Code.ERROR ) return;
             String message;
             switch(actionData.getAction()/100){
-                case 1:
-                message = userResponse(actionData.getAction()%100);
-                break;
-                case 2:
-                message = dice(actionData.getAction()%100);
-                break;
-                default://case 3:
-                message = streamInfo(actionData.getAction()%100);
-                break;
+                case 1: message = userResponse(actionData.getAction()%100); break;
+                case 2: message = dice(actionData.getAction()%100); break;
+                case 3: message = streamInfo(actionData.getAction()%100); break;
+                default: return;
             }
-            twitchClient.getChat().sendMessage( ((ActionDataMessage) actionData).getMessage().getChannelName(), message);
+            twitchClient.getChat().sendMessage(((ActionDataMessage) actionData).getMessage().getChannelName(), message);
         }        
         
         private String userResponse(int code) {
+            ActionDataMessage message = (ActionDataMessage) actionData;
             int n = (int)(Math.random()*GREETINGS_MESSAGES.length);
             String res;
-            ActionDataMessage message = (ActionDataMessage) actionData;
             switch(code/10){
                 case 0: res = String.format(GREETINGS_MESSAGES[n], code%10 == 1 ? (message.getMessage().getUserName()) : message.getArgument()); break;
                 case 1: res = String.format("Check out @%s channel! -> twitch.tv/%s", message.getArgument(), message.getArgument()); break;
@@ -117,24 +93,23 @@ public class DisplayAgent extends Agent {
         private String dice(int i) {
             ActionDataMessage message = (ActionDataMessage) actionData;
             int sides = i==1 ? 6 : Integer.parseInt(message.getArgument());
-            return String.format("@%s, you got the number %s",message.getMessage().getUserName(), String.valueOf(1+(int)(Math.random()*sides)));
+            return String.format("@%s, you got the number %s", message.getMessage().getUserName(), String.valueOf(1+(int)(Math.random()*sides)));
         }
         
         private String streamInfo(int code){
-            String res;
             ActionDataMessage message = (ActionDataMessage) actionData;
+            String res;
             switch(code){
-                case 1:
-                LocalTime now = LocalTime.now(ZoneId.of(timeZone));
-                res = String.format("@%s Local time is %d:%d",message.getMessage().getChannelName(),now.getHour(),now.getMinute());
-                break;   
-                case 11:
-                //TODO
-                default:
-                res = "";
-                break;      
+                case 1: res = getLocalTimeMessage(message.getMessage().getChannelName()); break;   
+                case 11: //TODO
+                default: res = "";    
             }
             return res;
+        }
+
+        private String getLocalTimeMessage(String channelName){
+            LocalTime now = LocalTime.now(ZoneId.of(timeZone));
+            return String.format("@%s Local time is %d:%d", channelName, now.getHour(), now.getMinute());
         }
     }
     
@@ -182,38 +157,29 @@ public class DisplayAgent extends Agent {
         }
         
         private boolean askHelix(){
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setType("moderar-canal");
-            template.addServices(sd);
-            AID[] processingAgents = null;
+            AID[] helixAgents = null;
             try{
-                DFAgentDescription[] result = DFService.search(myAgent, template);
-                processingAgents = new AID[result.length];
+                DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("moderar-canal"));
+                helixAgents = new AID[result.length];
                 for(int i=0; i<result.length; i++){
-                    processingAgents[i] = result[i].getName();
+                    helixAgents[i] = result[i].getName();
                 }
             } catch(FIPAException fe){
                 fe.printStackTrace();
             }
-            if(processingAgents == null || processingAgents.length == 0) return false; // add log
+
+            if(helixAgents == null || helixAgents.length == 0) return false; // add log
+
             try {
-                for(int i = 0; i < processingAgents.length; i++){
-                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                    msg.addReceiver(processingAgents[i]);
-                    msg.setOntology("ontologia");
-                    msg.setLanguage(new SLCodec().getName());
-                    msg.setEnvelope(new Envelope());
-                    msg.getEnvelope().setPayloadEncoding("ISO8859_1");
-                    msg.setContentObject(actionData);
-                    send(msg);
-                    msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
+                for(int i = 0; i < helixAgents.length; i++){
+                    send(Utils.buildRequestMessage(helixAgents[i], actionData));
+                    ACLMessage msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
                     if(msg.getPerformative() == ACLMessage.AGREE){
                         return true;
                     }
                 }
             } catch (IOException e) {
-                System.err.printf("No se pudo enviar el mensaje\n");
+                System.err.println("No se pudo enviar el mensaje");
                 e.printStackTrace();
             }
             return false;

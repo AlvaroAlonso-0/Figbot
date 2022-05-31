@@ -1,6 +1,6 @@
 package models;
 
-import java.io.Serializable;
+import jade.util.leap.Serializable;
 
 public class TwitchMessage implements Serializable{
     
