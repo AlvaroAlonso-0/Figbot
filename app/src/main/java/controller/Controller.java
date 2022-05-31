@@ -32,18 +32,11 @@ public class Controller {
         this.moderation = moderation;
         this.channelName = channelName;
         started = true;
-        System.out.printf("Moderation -> %s, ChannelName -> %s, Started -> %s\n", moderation, channelName, getStarted());//TODO
         displayGui = new DisplayGUI(channelName, moderation);
     }
 
     public synchronized void displayModerationEvent(DisplayInfo info){ 
-        String event = String.format("%s - %s - %s", info.getAction(), info.getMessage(), info.getArgument());
+        String event = String.format("[%d:%d:%d] %s - %s - %s", info.getAction(), info.getMessage(), info.getArgument());
         displayGui.newEvent(event);
     }
-
-    //TODO borrar?
-    public static void main (String [] args){
-        new Controller();
-    }
-    
 }

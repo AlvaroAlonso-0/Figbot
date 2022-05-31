@@ -33,7 +33,7 @@ public class Utils {
     public static void registerService(Agent agent, String name, String type){
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(agent.getAID());
-        dfd.addServices(Utils.buildServiceDescription("moderador-del-chat", "moderar-canal"));
+        dfd.addServices(Utils.buildServiceDescription(name, type));
         
         try{
             DFService.register(agent, dfd);
