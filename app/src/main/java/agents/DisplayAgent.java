@@ -59,7 +59,7 @@ public class DisplayAgent extends Agent {
         
         @Override
         public void action() {
-            ACLMessage msg = myAgent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchOntology("ontologia")));
+            ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchOntology("ontologia")));
             try {
                 actionData = (ActionData)msg.getContentObject();
             } catch (UnreadableException e) {
@@ -145,14 +145,14 @@ public class DisplayAgent extends Agent {
             if (actionData.getAction() < Constants.Code.BAN || actionData.getAction() == Constants.Code.ERROR) return;
             ActionDataModeration mod = (ActionDataModeration) actionData;
             if(mod.getAction()/10 == 91){
-                
+                if(!askHelix()) return;
                 mod.setAction(mod.getAction()-10);
             }
             DisplayInfo displayInfo;
             switch(mod.getAction()){
-                case Constants.Code.BAN: 
-                case Constants.Code.UNBAN: 
-                case Constants.Code.TIMEOUT: 
+                case Constants.Code.BAN: displayInfo = buildTARGET(mod,Constants.Message.BAN);break;
+                case Constants.Code.UNBAN: displayInfo = buildTARGET(mod, Constants.Message.UNBAN);break;
+                case Constants.Code.TIMEOUT: displayInfo = buildTIMEOUT(mod);break;
                 case Constants.Code.DELETE: displayInfo = buildTARGET(mod,Constants.Message.DELETE);break;
                 case Constants.Code.SLOW: displayInfo = buildSLOW(mod, Constants.Message.SLOW);break;
                 case Constants.Code.SLOW_OFF: displayInfo = buildSLOW(mod, Constants.Message.SLOW_OFF);break;
@@ -161,16 +161,27 @@ public class DisplayAgent extends Agent {
             App.getController().displayModerationEvent(displayInfo);
         }
 
-        //TODO
-        private DisplayInfo buildTARGET(ActionDataModeration mod, String message){
-            return new DisplayInfo(mod.getAction(), String.format("%s %s %s", mod.getModeration().getCreatedBy(), message, mod.getModeration().getTarget()));
+        private DisplayInfo buildTARGET(ActionDataModeration mod, String actionMessage){
+            String message = String.format("%s %s %s", mod.getModeration().getCreatedBy(), actionMessage, mod.getModeration().getTarget());
+            if(mod.getModeration().getReason() != null){
+                return new DisplayInfo(mod.getAction(), message, mod.getModeration().getReason());
+            }
+            return new DisplayInfo(mod.getAction(), message);
         }
 
-        private DisplayInfo buildSLOW(ActionDataModeration mod, String message){
-            return new DisplayInfo(mod.getAction(), String.format("%s %s", mod.getModeration().getCreatedBy(), message));
+        private DisplayInfo buildTIMEOUT(ActionDataModeration mod){
+            String message = String.format("%s %s %s for %d seconds", mod.getModeration().getCreatedBy(), Constants.Message.TIMEOUT, mod.getModeration().getTarget(), mod.getModeration().getTimeoutDuration());
+            if(mod.getModeration().getReason() != null){
+                return new DisplayInfo(mod.getAction(), message , mod.getModeration().getReason());
+            }
+            return new DisplayInfo(mod.getAction(), message);
+        }
+
+        private DisplayInfo buildSLOW(ActionDataModeration mod, String actionMessage){
+            return new DisplayInfo(mod.getAction(), String.format("%s %s", mod.getModeration().getCreatedBy(), actionMessage));
         }
         
-        private void askHelix(){
+        private boolean askHelix(){
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
             sd.setType("moderar-canal");
@@ -185,24 +196,27 @@ public class DisplayAgent extends Agent {
             } catch(FIPAException fe){
                 fe.printStackTrace();
             }
-            if(processingAgents == null || processingAgents.length == 0) return;
+            if(processingAgents == null || processingAgents.length == 0) return false; // add log
             try {
                 for(int i = 0; i < processingAgents.length; i++){
-                    ACLMessage msg = new ACLMessage(ACLMessage.AGREE); // no sabemos si esto es asi, es para subirlo a git
+                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                     msg.addReceiver(processingAgents[i]);
                     msg.setOntology("ontologia");
                     msg.setLanguage(new SLCodec().getName());
                     msg.setEnvelope(new Envelope());
                     msg.getEnvelope().setPayloadEncoding("ISO8859_1");
                     msg.setContentObject(actionData);
-                    
-                    myAgent.send(msg);
+                    send(msg);
+                    msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
+                    if(msg.getPerformative() == ACLMessage.AGREE){
+                        return true;
+                    }
                 }
-                actionData.setAction(Constants.Code.ERROR);
             } catch (IOException e) {
                 System.err.printf("No se pudo enviar el mensaje\n");
                 e.printStackTrace();
             }
+            return false;
         }
         
     }

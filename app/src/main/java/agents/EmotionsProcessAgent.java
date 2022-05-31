@@ -23,13 +23,17 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import models.ActionDataMessage;
+import models.ActionDataModeration;
+import models.ModerationMessage;
+import models.TwitchMessage;
 import models.TwitchMessageHolder;
 
 public class EmotionsProcessAgent extends Agent{
 
+    private static final int TIMEOUT_DURATION = 60;
+
     protected TwitchMessageHolder holder;
-    private ActionDataMessage actionData;
+    private ActionDataModeration actionData;
     private Set<String> swearWords;
  
     @Override
@@ -49,7 +53,7 @@ public class EmotionsProcessAgent extends Agent{
             System.err.println("Agent dead "+ this.getLocalName()+"\n\t"+e.getMessage());
         }
         holder = new TwitchMessageHolder();
-        actionData = new ActionDataMessage();
+        actionData = new ActionDataModeration();
         fillSwearWords();
         addBehaviour(new ReceiveMessage(this,holder));
         addBehaviour(new ProcessMessage());
@@ -92,25 +96,34 @@ public class EmotionsProcessAgent extends Agent{
                 }
                 if (ratio >= ratioLimit){
                     System.out.println("ban");
-                    actionData.setAction(Constants.Code.BAN);
-                    actionData.setMessage(holder.getMessage());
+                    actionData.setAction(Constants.Code.DO_BAN);
+                    actionData.setModeration(twitchMessage2ModerationMessage(holder.getMessage()));
                 }
                 else if (ratio >= 10){
                     if (analisis(holder.getMessage().getMessage())){
                         System.out.println("ban + analisis");
-                        actionData.setAction(Constants.Code.BAN);
-                        actionData.setMessage(holder.getMessage());
+                        actionData.setAction(Constants.Code.DO_BAN);
+                        actionData.setModeration(twitchMessage2ModerationMessage(holder.getMessage()));
                     }
                     else {
                         System.out.println("timeout");
-                        actionData.setAction(Constants.Code.TIMEOUT);
-                        actionData.setMessage(holder.getMessage());
+                        actionData.setAction(Constants.Code.DO_TIMEOUT);
+                        actionData.setModeration(twitchMessage2ModerationMessage(holder.getMessage()));
+                        actionData.getModeration().setTimeoutDuration(TIMEOUT_DURATION);
                     }
                 }
                 holder.setMessage(null); 
             }
         }
-  
+        
+        private ModerationMessage twitchMessage2ModerationMessage(TwitchMessage tm){
+            ModerationMessage mm = new ModerationMessage();
+            mm.setCreatedBy(Constants.BOT_NAME);
+            mm.setTarget(tm.getUserName());
+            mm.setReason(tm.getMessage());
+            return mm;
+        }
+
         private boolean analisis(String mensaje){
             Properties pipelineProps = new Properties();
             Properties tokenizerProps = new Properties();

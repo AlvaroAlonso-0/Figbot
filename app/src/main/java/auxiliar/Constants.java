@@ -2,6 +2,8 @@ package auxiliar;
 
 public class Constants {
 
+    public static final String BOT_NAME = "figb0t";
+
     public class Tokens{
         public static final String ACCESS_TOKEN = "aarmv79586b3u9qg6bo5zygkcrzp1a" ;
         public static final String REFRESH_TOKEN = "6kua5gujpqcz31p7z60994f5wx5636awnyp6st83sgaph8eulb";

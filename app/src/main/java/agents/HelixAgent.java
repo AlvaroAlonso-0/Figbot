@@ -1,20 +1,16 @@
 package agents;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
-import com.github.philippheuer.events4j.core.EventManager;
 import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
 import com.github.twitch4j.pubsub.events.ChatModerationEvent;
 
 import auxiliar.Constants;
-import behaviours.SendMessage;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
 import jade.core.Agent;
@@ -26,9 +22,9 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import models.TwitchMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 import models.ActionData;
-import models.ActionDataMessage;
 import models.ActionDataModeration;
 import models.ModerationMessage;
 
@@ -71,6 +67,7 @@ public class HelixAgent extends Agent{
         addBehaviour(new JoinChannels());
         addBehaviour(new ReadModEvent());
         addBehaviour(new SendMessage());
+        addBehaviour(new ReceiveMessage());
     }
     
     @Override
@@ -96,7 +93,7 @@ public class HelixAgent extends Agent{
         public void action() {
             twitchClient.getPubSub().listenForModerationEvents(oauth, Constants.Tokens.USER_ID, "98803007");
             twitchClient.getEventManager().onEvent(ChatModerationEvent.class, event -> {
-                if (event.getData().getCreatedBy().equals("figb0t")){
+                if (Constants.BOT_NAME.equals(event.getData().getCreatedBy())){
                     return;
                 }
                 System.out.println("Se ha realizado un: " + event.getData().getModerationAction().ordinal());
@@ -160,6 +157,26 @@ public class HelixAgent extends Agent{
                 System.err.printf("No se pudo enviar el mensaje\n");
                 e.printStackTrace();
             }
+        }
+    }
+
+    public class ReceiveMessage extends CyclicBehaviour{
+        
+        @Override
+        public void action() {
+            ACLMessage msg = blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            ActionDataModeration actionData = null;
+            try {
+                actionData = (ActionDataModeration) msg.getContentObject();
+            } catch (UnreadableException e) {
+                e.printStackTrace();
+                return;
+            }
+            //TODO
+            System.out.println("ME HAN PREGUNTADO PARA BANEAR A " + actionData.getModeration().getTarget());
+            ACLMessage answer = msg.createReply();
+            answer.setPerformative(ACLMessage.REFUSE);
+            send(answer);
         }
     }
 }
