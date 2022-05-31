@@ -28,7 +28,7 @@ public class HelixAgent extends Agent{
     private OAuth2Credential oauth;
     private String channel;
     private Queue<ActionData> events;
-    private String channelID = "98803007";
+    private String channelID = "98803007";//TODO
     
     protected void setup(){
         Utils.registerService(this, "moderador-del-chat", "moderar-canal");
@@ -41,6 +41,7 @@ public class HelixAgent extends Agent{
         .build();
         Object[] args = getArguments();
         channel = args[0].toString();
+        //channelID = args[1].toString();//TODO
         
         addBehaviour(new JoinChannels());
         addBehaviour(new ReadModEvent());
@@ -130,7 +131,8 @@ public class HelixAgent extends Agent{
         
         @Override
         public void action() {
-            ACLMessage msg = blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            ACLMessage msg;
+            if((msg = receive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST))) == null) return;
             ActionDataModeration actionData = null;
             try {
                 actionData = (ActionDataModeration) msg.getContentObject();
@@ -138,7 +140,7 @@ public class HelixAgent extends Agent{
                 e.printStackTrace();
                 return;
             }
-            //TODO
+            //TODO 
             System.out.println("ME HAN PREGUNTADO PARA BANEAR A " + actionData.getModeration().getTarget());
             ACLMessage answer = msg.createReply();
             answer.setPerformative(ACLMessage.REFUSE);

@@ -2,7 +2,7 @@ package auxiliar;
 
 public class Constants {
 
-    public static final String BOT_NAME = "figb0t";
+    public static final String BOT_NAME = "figb0t";    
 
     public class Tokens{
         public static final String ACCESS_TOKEN = "aarmv79586b3u9qg6bo5zygkcrzp1a" ;
@@ -51,6 +51,7 @@ public class Constants {
         public static final String SLOW_OFF = "disabled slow mode";
     }
 
+    //TODO Para que se usa?
     public class Action {
         public static final String BAN = "Ban";
         public static final String UNBAN = "Unban";
@@ -58,5 +59,12 @@ public class Constants {
         public static final String DELETE = "Delete";
         public static final String SLOW = "Slow";
         public static final String SLOW_OFF = "Slowoff";
+    }
+
+    //TODO terminar - posible conflicto con hora de verano
+    public static class TIMES{
+        public static final String[] ZONES = {"GMT+12", "GMT+11", "GMT+10", "GMT+9:30", "GMT+9", "GMT+8", "GMT+7", "GMT+6", "GMT+5:30", "GMT+5", "GMT+4", "GMT+3", "GMT+2", "GMT+1", "GMT", "GMT-1", "GMT-3", "GMT-4", "GMT-5", "GMT-6", "GMT-7", "GMT-8", "GMT-10","GMT-11"};
+
+        public static final String[] CITIES = {"Wellington", "New-Caledonia", "Melbourne / EST", "Darwin / CST", "Seúl", "Hongkong / WST", "Bangkok", "Almaty", "Nueva Delhi", "Ashgabad", "Mauritius", ""};
     }
 }

@@ -27,7 +27,7 @@ import figbot.App;
 public class DisplayAgent extends Agent {
     
     private ActionData actionData;
-    private String timeZone = "Europe/Paris";//TODO
+    private String timeZone = "GMT+12";//"Europe/Paris";//TODO
     
     @Override
     protected void setup(){
@@ -101,7 +101,8 @@ public class DisplayAgent extends Agent {
             String res;
             switch(code){
                 case 1: res = getLocalTimeMessage(message.getMessage().getChannelName()); break;   
-                case 11: //TODO
+                case 11: res = getTotalSubsMessage(message.getMessage().getChannelName()); break;
+                case 21: res = getTitleMessage(message.getMessage().getChannelName()); break;
                 default: res = "";    
             }
             return res;
@@ -109,7 +110,19 @@ public class DisplayAgent extends Agent {
 
         private String getLocalTimeMessage(String channelName){
             LocalTime now = LocalTime.now(ZoneId.of(timeZone));
-            return String.format("@%s Local time is %d:%d", channelName, now.getHour(), now.getMinute());
+            return String.format("@%s local time is %d:%d", channelName, now.getHour(), now.getMinute());
+        }
+
+        //TODO GET SUBS
+        private String getTotalSubsMessage(String channelName){
+            //Solicitar mediante helix
+            return String.format("@%s has %d subscribers", channelName, 1);
+        }
+
+        //TODO GET TITLE  
+        private String getTitleMessage(String channelName){
+            //Solicitar mediante helix
+            return String.format("@%s is streaming %s", channelName, "");
         }
     }
     
