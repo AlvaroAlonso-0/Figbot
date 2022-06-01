@@ -23,8 +23,8 @@ public class DisplayGUI {
         frame.pack();
         events.setBackground(Color.BLACK);
         frame.add(events);
-        
     }
+
     
     public void newEvent(String event){
         events.addEvent(event);

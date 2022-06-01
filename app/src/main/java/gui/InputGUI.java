@@ -94,10 +94,4 @@ public class InputGUI {
            }
         });
     }
-
-
-
-    public static void main (String [] args){
-        //new InputGUI();
-    }
 }

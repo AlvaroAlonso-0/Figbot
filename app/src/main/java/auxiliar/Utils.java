@@ -68,6 +68,17 @@ public class Utils {
         msg.setContentObject(content);
         return msg;
     }
+
+    public static ACLMessage buildInformMessage(AID receiver, String ontology, String content) throws IOException{
+        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+        msg.addReceiver(receiver);
+        msg.setOntology(ontology);
+        msg.setLanguage(new SLCodec().getName());
+        msg.setEnvelope(new Envelope());
+        msg.getEnvelope().setPayloadEncoding("ISO8859_1");
+        msg.setContentObject(content);
+        return msg;
+    }
     
     public static ModerationMessage twitchMessageToModeration(TwitchMessage tm){
         ModerationMessage mm = new ModerationMessage();

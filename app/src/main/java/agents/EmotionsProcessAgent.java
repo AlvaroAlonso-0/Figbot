@@ -47,7 +47,7 @@ public class EmotionsProcessAgent extends Agent{
         swearWords = new LinkedHashSet<>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader("src/main/resources/swearwords.txt"));
+            reader = new BufferedReader(new FileReader("app/src/main/resources/swearwords.txt"));
             String line = reader.readLine();
             while (line != null) {
                 swearWords.add(line);

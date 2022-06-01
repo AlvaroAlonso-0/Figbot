@@ -1,11 +1,16 @@
 package agents;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
+import com.github.twitch4j.helix.domain.StreamList;
+import com.github.twitch4j.helix.domain.SubscriptionList;
 import com.github.twitch4j.pubsub.events.ChatModerationEvent;
 
 import jade.core.AID;
@@ -26,12 +31,14 @@ import models.ModerationMessage;
 public class HelixAgent extends Agent{
     private TwitchClient twitchClient;
     private OAuth2Credential oauth;
-    private String channel;
     private Queue<ActionData> events;
-    private String channelID = "98803007";//TODO
+    private String channel;
+    private String channelID;
+    private boolean moderationON = false;
     
     protected void setup(){
         Utils.registerService(this, "moderador-del-chat", "moderar-canal");
+        Utils.registerService(this, "controlador-helix", "helix");
         
         oauth = Utils.generateCredential();
         events = new LinkedBlockingQueue<>();
@@ -41,12 +48,15 @@ public class HelixAgent extends Agent{
         .build();
         Object[] args = getArguments();
         channel = args[0].toString();
-        //channelID = args[1].toString();//TODO
-        
+        channelID = args[1].toString();
+        moderationON = Boolean.parseBoolean(args[2].toString());
         addBehaviour(new JoinChannels());
-        addBehaviour(new ReadModEvent());
-        addBehaviour(new SendMessage());
+        if(moderationON){
+            addBehaviour(new ReadModEvent());
+            addBehaviour(new SendMessage());
+        }
         addBehaviour(new ReceiveMessage());
+        addBehaviour(new QueryAndInformHelix());
     }
     
     @Override
@@ -101,7 +111,7 @@ public class HelixAgent extends Agent{
         public void action() {
             ActionData actionData;
             if(events.isEmpty() || (actionData = events.poll()).getAction() == Constants.Code.ERROR) return;
-        
+            
             AID[] processingAgents = null;
             try{
                 DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("visualizar-acciones"));
@@ -112,9 +122,9 @@ public class HelixAgent extends Agent{
             } catch(FIPAException fe){
                 fe.printStackTrace();
             }
-
+            
             if(processingAgents == null || processingAgents.length == 0) return;
-
+            
             try {
                 for(int i = 0; i < processingAgents.length; i++){
                     myAgent.send(Utils.buildRequestMessage(processingAgents[i], actionData));
@@ -133,18 +143,103 @@ public class HelixAgent extends Agent{
         public void action() {
             ACLMessage msg;
             if((msg = receive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST))) == null) return;
+            if(!moderationON){
+                refuseRequest(msg);
+            }
             ActionDataModeration actionData = null;
             try {
                 actionData = (ActionDataModeration) msg.getContentObject();
             } catch (UnreadableException e) {
                 e.printStackTrace();
+                refuseRequest(msg);
                 return;
             }
-            //TODO 
+            //TODO acciones helix
             System.out.println("ME HAN PREGUNTADO PARA BANEAR A " + actionData.getModeration().getTarget());
-            ACLMessage answer = msg.createReply();
+
+            switch(actionData.getAction()){
+                case Constants.Code.DO_BAN: doBan(msg, actionData.getModeration()); break;
+                case Constants.Code.DO_TIMEOUT:; doTimeout(msg, actionData.getModeration()); break;
+                default: refuseRequest(msg);
+            }
+        }
+
+        private void doBan(ACLMessage requestMessage, ModerationMessage mod){
+            if(twitchClient.getChat().ban(channel, mod.getTarget(), "Figbot auto-ban: " + mod.getReason())){
+                acceptRequest(requestMessage);
+            }else{
+                refuseRequest(requestMessage);
+            }
+            
+        }
+
+        private void doTimeout(ACLMessage requestMessage, ModerationMessage mod){
+            if(twitchClient.getChat().timeout(channel, mod.getTarget(), Duration.ofSeconds(mod.getTimeoutDuration()), "Figbot auto-timeout: " + mod.getReason())){
+                acceptRequest(requestMessage);
+            }else{
+                refuseRequest(requestMessage);
+            }
+        }
+
+        private void acceptRequest(ACLMessage requestMessage){
+            ACLMessage answer = requestMessage.createReply();
+            answer.setPerformative(ACLMessage.AGREE);
+            send(answer);
+        }
+        
+        private void refuseRequest(ACLMessage requestMessage){
+            ACLMessage answer = requestMessage.createReply();
             answer.setPerformative(ACLMessage.REFUSE);
             send(answer);
         }
+    }
+    
+    public class QueryAndInformHelix extends CyclicBehaviour{
+        
+        @Override
+        public void action() {
+            ACLMessage msg;
+            if((msg = receive(MessageTemplate.MatchPerformative(ACLMessage.QUERY_REF))) == null) return;
+            
+            String channelName = null;
+            try {
+                channelName = (String) msg.getContentObject();
+            } catch (UnreadableException e) {
+                e.printStackTrace();
+            }
+            ACLMessage answer = msg.createReply();
+            answer.setPerformative(ACLMessage.INFORM_REF);
+            answer.setContent(getHelixInfo(msg.getOntology(), channelName));
+            send(answer);
+        }
+        
+        private String getHelixInfo(String infoRequested, String channelName){
+            if(channelName == null) return null;
+            String info;
+            switch(infoRequested){
+                case "title": info = getStreamTitle(channelName); break;
+                case "subs": info = getTotalSubs(channelName); break;
+                default: info = null;
+            }
+            System.out.println("HELIX INFO: " + info);
+            return info;
+        }
+        
+        private String getStreamTitle(String channelName){
+            System.out.println("voy a buscar el titulo");//TODO
+            List<String> channelArgs = new LinkedList<>();
+            channelArgs.add(channelName);
+            StreamList resultList = twitchClient.getHelix().getStreams(null, null, null, null, null, null, channelArgs, null).execute();
+            return resultList.getStreams().get(0).getTitle();
+        }
+        
+        private String getTotalSubs(String channelName){
+            System.out.println("Voy a buscar las subs");//TODO
+            if(!channel.equals(channelName)) return null;
+            SubscriptionList resultList = twitchClient.getHelix().getSubscriptions(Constants.Tokens.ACCESS_TOKEN, channelName, null, null,null).execute();
+            return String.valueOf(resultList.getSubscriptions().size());
+        }
+        
+        
     }
 }

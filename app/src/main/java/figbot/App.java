@@ -3,12 +3,14 @@
  */
 package figbot;
 
+//TODO borrar
+/*
 import jade.core.Runtime;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import jade.core.Profile;
-import jade.core.ProfileImpl;
+import jade.core.ProfileImpl;*/
 
 import controller.Controller;
 
@@ -22,18 +24,8 @@ public class App{
 
     public static void main(String[] args) {
         controller = new Controller();
-
-        while(!controller.getStarted()){ // While initial menu isn't completed wait 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        //TODO boton menu completado lanzar
-        System.out.println("LLegamos");
-
+        //TODO borrar
+        /*
         Runtime runtime = jade.core.Runtime.instance();
         Profile profile = new ProfileImpl();
         AgentContainer container = runtime.createMainContainer(profile);
@@ -59,6 +51,6 @@ public class App{
             display.start();
         } catch(StaleProxyException e){
             e.printStackTrace();
-        }
+        }*/
     }
 }

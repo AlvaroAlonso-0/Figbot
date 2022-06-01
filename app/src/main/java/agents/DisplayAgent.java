@@ -27,13 +27,13 @@ import figbot.App;
 public class DisplayAgent extends Agent {
     
     private ActionData actionData;
-    private String timeZone = "GMT+12";//"Europe/Paris";//TODO
+    private String timeZone;
     
     @Override
     protected void setup(){
         Utils.registerService(this, "visualizador-de-acciones", "visualizar-acciones");
         
-        //timeZone = getArguments()[0].toString(); //TODO
+        timeZone = getArguments()[0].toString();
         addBehaviour(new ReceiveMessage());
         addBehaviour(new SendChatToTwitch());
         addBehaviour(new ChatToGUI());
@@ -73,7 +73,9 @@ public class DisplayAgent extends Agent {
                 case 3: message = streamInfo(actionData.getAction()%100); break;
                 default: return;
             }
-            twitchClient.getChat().sendMessage(((ActionDataMessage) actionData).getMessage().getChannelName(), message);
+            if(message != null){
+                twitchClient.getChat().sendMessage(((ActionDataMessage) actionData).getMessage().getChannelName(), message);
+            }
         }        
         
         private String userResponse(int code) {
@@ -103,7 +105,7 @@ public class DisplayAgent extends Agent {
                 case 1: res = getLocalTimeMessage(message.getMessage().getChannelName()); break;   
                 case 11: res = getTotalSubsMessage(message.getMessage().getChannelName()); break;
                 case 21: res = getTitleMessage(message.getMessage().getChannelName()); break;
-                default: res = "";    
+                default: res = null;    
             }
             return res;
         }
@@ -113,16 +115,60 @@ public class DisplayAgent extends Agent {
             return String.format("@%s local time is %d:%d", channelName, now.getHour(), now.getMinute());
         }
 
-        //TODO GET SUBS
         private String getTotalSubsMessage(String channelName){
-            //Solicitar mediante helix
-            return String.format("@%s has %d subscribers", channelName, 1);
-        }
+            AID[] helixAgents = null;
+            try{
+                DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("helix"));
+                helixAgents = new AID[result.length];
+                for(int i=0; i<result.length; i++){
+                    helixAgents[i] = result[i].getName();
+                }
+            } catch(FIPAException fe){
+                fe.printStackTrace();
+            }
 
-        //TODO GET TITLE  
+            if(helixAgents == null || helixAgents.length == 0) return null;
+            ACLMessage msg = null;
+            try {
+                for(int i = 0; i < helixAgents.length; i++){
+
+                    send(Utils.buildInformMessage(helixAgents[i], "subs", channelName));
+                    msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
+                    if(msg.getPerformative() == ACLMessage.INFORM_REF) break;
+                }
+            } catch (IOException e) {
+                System.err.println("No se pudo enviar el mensaje");
+                e.printStackTrace();
+            }
+            return (msg == null || msg.getContent() == null) ? null : String.format("@%s has %d subscribers", channelName, Integer.valueOf(msg.getContent()));
+        }
+ 
         private String getTitleMessage(String channelName){
-            //Solicitar mediante helix
-            return String.format("@%s is streaming %s", channelName, "");
+            AID[] helixAgents = null;
+            try{
+                DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("helix"));
+                helixAgents = new AID[result.length];
+                for(int i=0; i<result.length; i++){
+                    helixAgents[i] = result[i].getName();
+                }
+            } catch(FIPAException fe){
+                fe.printStackTrace();
+            }
+
+            if(helixAgents == null || helixAgents.length == 0) return null;
+            ACLMessage msg = null;
+            try {
+                for(int i = 0; i < helixAgents.length; i++){
+
+                    send(Utils.buildInformMessage(helixAgents[i], "title", channelName));
+                    msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
+                    if(msg.getPerformative() == ACLMessage.INFORM_REF) break;
+                }
+            } catch (IOException e) {
+                System.err.println("No se pudo enviar el mensaje");
+                e.printStackTrace();
+            }
+            return (msg == null || msg.getContent() == null) ? null : String.format("@%s is streaming %s", channelName, msg.getContent());
         }
     }
     
