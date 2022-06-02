@@ -30,7 +30,7 @@ public class Controller {
         this.channelName = channelName;
         displayGui = new DisplayGUI(channelName, moderationON);
         //TODO
-        figb0t.start(channelName, moderationON);
+        figb0t.start(channelName);
     }
 
     public synchronized void displayModerationEvent(DisplayInfo info){

@@ -9,11 +9,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
-import com.github.twitch4j.helix.domain.CreateClip;
 
 import com.github.twitch4j.helix.domain.CreateClipList;
 import com.github.twitch4j.helix.domain.StreamList;
-import com.github.twitch4j.helix.domain.SubscriptionList;
 import com.github.twitch4j.helix.domain.UserList;
 import com.github.twitch4j.pubsub.events.ChatModerationEvent;
 
@@ -38,7 +36,6 @@ public class HelixAgent extends Agent{
     private Queue<ActionData> events;
     private String channel;
     private String channelID;
-    private boolean moderationON = false;
     
     protected void setup(){
         Utils.registerTwoServices(this, "moderador-del-chat", "moderar-canal", "controlador-helix", "helix");
@@ -52,12 +49,9 @@ public class HelixAgent extends Agent{
         Object[] args = getArguments();
         channel = args[0].toString();
         channelID = getChannelID(channel);
-        moderationON = Boolean.parseBoolean(args[1].toString());
         addBehaviour(new JoinChannels());
-        if(moderationON){
-            addBehaviour(new ReadModEvent());
-            addBehaviour(new SendMessage());
-        }
+        addBehaviour(new ReadModEvent());
+        addBehaviour(new SendMessage());
         addBehaviour(new ReceiveMessage());
         addBehaviour(new QueryAndInformHelix());
     }
@@ -153,9 +147,6 @@ public class HelixAgent extends Agent{
         public void action() {
             ACLMessage msg;
             if((msg = receive(MessageTemplate.MatchPerformative(ACLMessage.REQUEST))) == null) return;
-            if(!moderationON){
-                refuseRequest(msg);
-            }
             ActionDataModeration actionData = null;
             try {
                 actionData = (ActionDataModeration) msg.getContentObject();

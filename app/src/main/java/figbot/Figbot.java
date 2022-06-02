@@ -20,14 +20,12 @@ public class Figbot {
         agents = new HashMap<>();
     }
 
-    public void start(String channelName, boolean moderationON){
+    public void start(String channelName){
         try {
             String[] channelArgs = {channelName};
-            String[] helixArgs = {channelName, String.valueOf(moderationON)};
             String[] displayArgs = {"Europe/Paris"};//TODO
             addDefaultAgents();
             addVariableDependantAgents(channelArgs, displayArgs);
-            addModerationAgents(helixArgs);
             startAgents();
         } catch (StaleProxyException e) {
             // TODO Auto-generated catch block
@@ -47,17 +45,13 @@ public class Figbot {
     private void addDefaultAgents() throws StaleProxyException{
         agents.put("command", container.createNewAgent("procesadorCommand", "agents.CommandProcessAgent", null));
         agents.put("caps", container.createNewAgent("procesadorCaps", "agents.CapsProcessAgent", null));
-    }
-    
-    private void addVariableDependantAgents(String[] perceptionArgs, String[] displayArgs) throws StaleProxyException{
-        agents.put("percepcion", container.createNewAgent("percepcion", "agents.PerceptionAgent", perceptionArgs));
-        agents.put("display", container.createNewAgent("visualizacion", "agents.DisplayAgent", displayArgs));
-    }
-    
-    private void addModerationAgents(String[] helixArgs) throws StaleProxyException{
         agents.put("emotion", container.createNewAgent("procesadorEmotions", "agents.EmotionsProcessAgent", null));
-        agents.put("helix", container.createNewAgent("moderador", "agents.HelixAgent", helixArgs));
-        
+    }
+    
+    private void addVariableDependantAgents(String[] channelArgs, String[] displayArgs) throws StaleProxyException{
+        agents.put("percepcion", container.createNewAgent("percepcion", "agents.PerceptionAgent", channelArgs));
+        agents.put("helix", container.createNewAgent("moderador", "agents.HelixAgent", channelArgs));
+        agents.put("display", container.createNewAgent("visualizacion", "agents.DisplayAgent", displayArgs));
     }
     
     private void startAgents() throws StaleProxyException{
