@@ -31,7 +31,7 @@ public class DisplayAgent extends Agent {
     
     @Override
     protected void setup(){
-        Utils.registerService(this, "visualizador-de-acciones", "visualizar-acciones");
+        Utils.registerOneService(this, "visualizador-de-acciones", "visualizar-acciones");
         
         timeZone = getArguments()[0].toString();
         addBehaviour(new ReceiveMessage());

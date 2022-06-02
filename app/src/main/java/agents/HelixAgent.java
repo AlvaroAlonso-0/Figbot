@@ -37,8 +37,7 @@ public class HelixAgent extends Agent{
     private boolean moderationON = false;
     
     protected void setup(){
-        Utils.registerService(this, "moderador-del-chat", "moderar-canal");
-        Utils.registerService(this, "controlador-helix", "helix");
+        Utils.registerTwoServices(this, "moderador-del-chat", "moderar-canal", "controlador-helix", "helix");
         
         oauth = Utils.generateCredential();
         events = new LinkedBlockingQueue<>();

@@ -21,7 +21,7 @@ public class CommandProcessAgent extends Agent{
  
     @Override
     protected void setup(){
-        Utils.registerService(this, "procesador-de-comandos", "procesar-mensajes");
+        Utils.registerOneService(this, "procesador-de-comandos", "procesar-mensajes");
 
         holder = new TwitchMessageHolder();
         actionData = new ActionDataMessage();

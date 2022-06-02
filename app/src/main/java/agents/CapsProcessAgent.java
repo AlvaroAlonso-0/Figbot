@@ -19,7 +19,7 @@ public class CapsProcessAgent extends Agent{
  
     @Override
     protected void setup(){
-        Utils.registerService(this, "procesador-de-mayusculas", "procesar-mensajes");
+        Utils.registerOneService(this, "procesador-de-mayusculas", "procesar-mensajes");
 
         holder = new TwitchMessageHolder();
         actionData = new ActionDataMessage();

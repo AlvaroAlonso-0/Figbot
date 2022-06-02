@@ -33,7 +33,7 @@ public class EmotionsProcessAgent extends Agent{
     
     @Override
     protected void setup(){
-        Utils.registerService(this, "procesador-de-emociones", "procesar-mensajes");
+        Utils.registerOneService(this, "procesador-de-emociones", "procesar-mensajes");
         
         holder = new TwitchMessageHolder();
         actionData = new ActionDataModeration();

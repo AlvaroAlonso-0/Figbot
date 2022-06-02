@@ -30,10 +30,23 @@ public class Utils {
         .withDefaultEventHandler(SimpleEventHandler.class);
     }
     
-    public static void registerService(Agent agent, String name, String type){
+    public static void registerOneService(Agent agent, String name, String type){
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(agent.getAID());
         dfd.addServices(Utils.buildServiceDescription(name, type));
+        
+        try{
+            DFService.register(agent, dfd);
+        } catch(FIPAException e){
+            System.err.println("Agent dead xd "+ agent.getLocalName()+"\n\t"+e.getMessage());
+        }
+    }
+
+    public static void registerTwoServices(Agent agent, String name1, String type1, String name2, String type2){
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(agent.getAID());
+        dfd.addServices(buildServiceDescription(name1, type2));
+        dfd.addServices(buildServiceDescription(name2, type2));
         
         try{
             DFService.register(agent, dfd);

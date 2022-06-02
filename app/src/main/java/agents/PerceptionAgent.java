@@ -28,7 +28,7 @@ public class PerceptionAgent extends Agent{
     private Queue<ChannelMessageEvent> messages;
     
     protected void setup(){
-        Utils.registerService(this, "lector-de-chat", "leer-mensajes");
+        Utils.registerOneService(this, "lector-de-chat", "leer-mensajes");
         
         twitchClient = Utils.defaultTwitchBuilder(Utils.generateCredential()).build();
         messages = new LinkedBlockingQueue<>();
