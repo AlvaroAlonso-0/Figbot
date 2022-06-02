@@ -9,7 +9,6 @@ public class Controller {
     
     private Figbot figb0t;
     private DisplayGUI displayGui;
-    private boolean moderationON;
     private String channelName;
 
     public Controller(){
@@ -17,18 +16,13 @@ public class Controller {
         new InputGUI(this);
     }
 
-    public boolean isModerating(){
-        return moderationON;
-    }
-
     public Object getChannelName(){
         return channelName;
     }
 
-    public void loadDisplayGui(String channelName, boolean moderationON){
-        this.moderationON = moderationON;
+    public void loadDisplayGui(String channelName){
         this.channelName = channelName;
-        displayGui = new DisplayGUI(channelName, moderationON);
+        displayGui = new DisplayGUI(channelName);
         //TODO
         figb0t.start(channelName);
     }

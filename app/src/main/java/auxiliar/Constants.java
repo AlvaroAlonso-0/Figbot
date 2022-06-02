@@ -1,5 +1,7 @@
 package auxiliar;
 
+import java.util.TimeZone;
+
 public class Constants {
 
     public static final String BOT_NAME = "figb0t";    
@@ -53,8 +55,9 @@ public class Constants {
 
     //TODO terminar - posible conflicto con hora de verano
     public static class TIMES{
-        public static final String[] ZONES = {"GMT+12", "GMT+11", "GMT+10", "GMT+9:30", "GMT+9", "GMT+8", "GMT+7", "GMT+6", "GMT+5:30", "GMT+5", "GMT+4", "GMT+3", "GMT+2", "GMT+1", "GMT", "GMT-1", "GMT-3", "GMT-4", "GMT-5", "GMT-6", "GMT-7", "GMT-8", "GMT-10","GMT-11"};
-
-        public static final String[] CITIES = {"Wellington", "New-Caledonia", "Melbourne / EST", "Darwin / CST", "Seúl", "Hongkong / WST", "Bangkok", "Almaty", "Nueva Delhi", "Ashgabad", "Mauritius", ""};
+        public static final String [] ZONES = {"GMT+12", "GMT+11", "GMT+10", "GMT+9:30", "GMT+9", "GMT+8", "GMT+7", "GMT+6", "GMT+5:30", "GMT+5", "GMT+4", "GMT+3", "GMT+2", "GMT+1", "GMT", "GMT-1", "GMT-3", "GMT-4", "GMT-5", "GMT-6", "GMT-7", "GMT-8", "GMT-10","GMT-11"};
+        public static final String [] FORBIDDEN = {"CET", "CST6CDT","EET", "EST5EDT", "GB", "GB-Eire", "Greenwich", "MET", "MST7MDT", "NZ", "NZ-CHAT", "PRC", "PST8PDT", "ROK", "UCT", "UTC", "Universal", "W-SU", "WET"};
+        //public static final String[] CITIES = {"Wellington", "New-Caledonia", "Melbourne / EST", "Darwin / CST", "Seúl", "Hongkong / WST", "Bangkok", "Almaty", "Nueva Delhi", "Ashgabad", "Moscú / MSK", "Helsinki"};
+        public static final String [] CITIES = TimeZone.getAvailableIDs();
     }
 }

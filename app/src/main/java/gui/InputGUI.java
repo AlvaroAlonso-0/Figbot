@@ -4,16 +4,20 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.function.Predicate;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.MouseInputAdapter;
 
+import auxiliar.Constants;
 import controller.Controller;
 
 public class InputGUI {
@@ -26,11 +30,8 @@ public class InputGUI {
     private JPanel background;
     private JLabel channelNameLabel;
     private JLabel channelIdLabel;
-    private JLabel moderatorLabel;
     private JTextField channelNameText;
-    private JTextField channelIdText;
-    private JCheckBox moderatorCheckBox;
-    private JOptionPane timeZone;
+    private JComboBox<String> timeZone;
     private JButton accept;
 
     private Controller controller;
@@ -63,39 +64,42 @@ public class InputGUI {
         channelNameLabel.setFont(new Font("Calibri", Font.BOLD, 20));
         channelNameLabel.setForeground(Color.black);
         channelNameText = new JTextField();
-        channelIdLabel = new JLabel("Channel's ID");
+        channelIdLabel = new JLabel("Timezone");
         channelIdLabel.setFont(new Font("Calibri", Font.BOLD, 20));
         channelIdLabel.setForeground(Color.black);
-        channelIdText = new JTextField();
-        moderatorLabel = new JLabel("Moderation");
-        moderatorLabel.setFont(new Font("Calibri", Font.BOLD, 20));
-        moderatorLabel.setForeground(Color.black);
-        moderatorCheckBox = new JCheckBox();
         accept = new JButton("Accept");
+        timeZone = new JComboBox<>(getTimeZones());
+        timeZone.setFont(new Font("Dialog", Font.PLAIN, 12));
         channelNameLabel.setBounds(25, 27, 175, 25);
         channelNameText.setBounds(215, 25, 160, 25);
         channelIdLabel.setBounds(25, 77, 160, 25);
-        channelIdText.setBounds(215, 75, 160, 25);
-        moderatorLabel.setBounds(25, 127, 160, 25);
-        moderatorCheckBox.setBackground(BACKGROUND_COLOR);
-        moderatorCheckBox.setBounds(140, 127, 18, 18);
-        timeZone = new JOptionPane();
-        accept.setBounds(232, 127, 127, 25);
+        timeZone.setBounds(215, 75, 160, 25);
+        accept.setBounds(MAX_WIDTH/4, 127, MAX_WIDTH/2, 25);
         background.add(channelNameLabel);
         background.add(channelNameText);
         background.add(channelIdLabel);
-        background.add(channelIdText);
-        background.add(moderatorLabel);
-        background.add(moderatorCheckBox);
+        background.add(timeZone);
         background.add(accept);
+        System.out.println(channelNameText.getFont());
         frame.getContentPane().add(background);
         accept.addMouseListener(new MouseInputAdapter() {
            public void mouseReleased(MouseEvent e){
-                controller.loadDisplayGui(channelNameText.getText(), moderatorCheckBox.isSelected());
+                controller.loadDisplayGui(channelNameText.getText());
                 frame.setVisible(false);
                 frame.dispose();
            }
         });
+    }
+
+    private String [] getTimeZones(){
+        List<String> forbidden = Arrays.asList(Constants.TIMES.FORBIDDEN);
+        String[] posibleLabels = Arrays.asList(TimeZone.getAvailableIDs()).stream().filter(new Predicate<String>() {
+            @Override
+            public boolean test(String t) {
+                return !t.contains("GMT") && !t.startsWith("Etc") && !t.startsWith("System") && !forbidden.contains(t);
+            }
+        }).toArray(String[]::new);
+        return Arrays.copyOfRange(posibleLabels, 0, posibleLabels.length - 28);
     }
 
     public static void main(String [] args){

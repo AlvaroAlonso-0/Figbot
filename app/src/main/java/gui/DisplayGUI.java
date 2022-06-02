@@ -10,8 +10,7 @@ public class DisplayGUI {
     private JFrame frame;
     private DynamicPanelList events;
     
-
-    public DisplayGUI(String channelName, boolean moderation){
+    public DisplayGUI(String channelName){
         frame = new JFrame("Figbot - " + channelName);
         events = new DynamicPanelList();
         frame.setSize(new Dimension(900, 900));
@@ -21,7 +20,7 @@ public class DisplayGUI {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        events.setBackground(Color.BLACK);
+        //events.setBackground(Color.BLACK);
         frame.add(events);
     }
 
@@ -32,6 +31,6 @@ public class DisplayGUI {
 
     //TODO borrar?
     public static void main (String [] args){
-        new DisplayGUI("rayo106", true);
+        new DisplayGUI("rayo106");
     }
 }
