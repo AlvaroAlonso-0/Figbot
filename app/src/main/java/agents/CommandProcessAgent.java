@@ -68,7 +68,7 @@ public class CommandProcessAgent extends Agent{
                     }
                     break;
                 case Constants.Commands.TIME  : ret = Constants.Code.TIME; break;
-                case Constants.Commands.SUBS  : ret = Constants.Code.SUBS; break;
+                case Constants.Commands.CLIP  : ret = Constants.Code.CLIP; break;
                 case Constants.Commands.TITLE : ret = Constants.Code.TITLE; break;
                 default: ret = Constants.Code.ERROR;
             }

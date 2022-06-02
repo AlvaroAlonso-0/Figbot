@@ -103,7 +103,7 @@ public class DisplayAgent extends Agent {
             String res;
             switch(code){
                 case 1: res = getLocalTimeMessage(message.getMessage().getChannelName()); break;   
-                case 11: res = getTotalSubsMessage(message.getMessage().getChannelName()); break;
+                case 11: res = getClipURL(message.getMessage().getChannelName(),message.getMessage().getUserName()); break;
                 case 21: res = getTitleMessage(message.getMessage().getChannelName()); break;
                 default: res = null;    
             }
@@ -115,7 +115,7 @@ public class DisplayAgent extends Agent {
             return String.format("@%s local time is %d:%d", channelName, now.getHour(), now.getMinute());
         }
 
-        private String getTotalSubsMessage(String channelName){
+        private String getClipURL(String channelName, String userName){
             AID[] helixAgents = null;
             try{
                 DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("helix"));
@@ -132,7 +132,7 @@ public class DisplayAgent extends Agent {
             try {
                 for(int i = 0; i < helixAgents.length; i++){
 
-                    send(Utils.buildInformMessage(helixAgents[i], "subs", channelName));
+                    send(Utils.buildInformMessage(helixAgents[i], "clip", channelName));
                     msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
                     if(msg.getPerformative() == ACLMessage.INFORM_REF) break;
                 }
@@ -140,7 +140,7 @@ public class DisplayAgent extends Agent {
                 System.err.println("No se pudo enviar el mensaje");
                 e.printStackTrace();
             }
-            return (msg == null || msg.getContent() == null) ? null : String.format("@%s has %d subscribers", channelName, Integer.valueOf(msg.getContent()));
+            return (msg == null || msg.getContent() == null) ? null : String.format("@%s has created a clip! -> %s", userName, msg.getContent());
         }
  
         private String getTitleMessage(String channelName){
@@ -178,7 +178,9 @@ public class DisplayAgent extends Agent {
         public void action() {
             if (actionData.getAction() < Constants.Code.BAN || actionData.getAction() == Constants.Code.ERROR) return;
             ActionDataModeration mod = (ActionDataModeration) actionData;
+            System.out.println("fuera del if");//TODO
             if(mod.getAction()/10 == 91){
+                System.out.println("DENTRO del if");//TODO
                 if(!askHelix()) return;
                 mod.setAction(mod.getAction()-10);
             }
@@ -220,6 +222,7 @@ public class DisplayAgent extends Agent {
             try{
                 DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("moderar-canal"));
                 helixAgents = new AID[result.length];
+                System.out.println("size = " + result.length);
                 for(int i=0; i<result.length; i++){
                     helixAgents[i] = result[i].getName();
                 }
@@ -228,7 +231,7 @@ public class DisplayAgent extends Agent {
             }
 
             if(helixAgents == null || helixAgents.length == 0) return false; // add log
-
+            System.out.println("ha pasado el if");
             try {
                 for(int i = 0; i < helixAgents.length; i++){
                     send(Utils.buildRequestMessage(helixAgents[i], actionData));

@@ -13,19 +13,17 @@ public class Figbot {
     
     AgentContainer container;
     Map<String,AgentController> agents;
-    
-    
-    
+
     public Figbot() {
         Runtime runtime = jade.core.Runtime.instance();
         container = runtime.createMainContainer(new ProfileImpl());
         agents = new HashMap<>();
     }
 
-    public void start(String channelName, String channelID, boolean moderationON){
+    public void start(String channelName, boolean moderationON){
         try {
             String[] channelArgs = {channelName};
-            String[] helixArgs = {channelName, channelID, String.valueOf(moderationON)};
+            String[] helixArgs = {channelName, String.valueOf(moderationON)};
             String[] displayArgs = {"Europe/Paris"};//TODO
             addDefaultAgents();
             addVariableDependantAgents(channelArgs, displayArgs);

@@ -9,8 +9,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
+import com.github.twitch4j.helix.domain.CreateClip;
+
+import com.github.twitch4j.helix.domain.CreateClipList;
 import com.github.twitch4j.helix.domain.StreamList;
 import com.github.twitch4j.helix.domain.SubscriptionList;
+import com.github.twitch4j.helix.domain.UserList;
 import com.github.twitch4j.pubsub.events.ChatModerationEvent;
 
 import jade.core.AID;
@@ -47,8 +51,8 @@ public class HelixAgent extends Agent{
         .build();
         Object[] args = getArguments();
         channel = args[0].toString();
-        channelID = args[1].toString();
-        moderationON = Boolean.parseBoolean(args[2].toString());
+        channelID = getChannelID(channel);
+        moderationON = Boolean.parseBoolean(args[1].toString());
         addBehaviour(new JoinChannels());
         if(moderationON){
             addBehaviour(new ReadModEvent());
@@ -63,6 +67,13 @@ public class HelixAgent extends Agent{
         super.takeDown();
         twitchClient.getChat().leaveChannel(channel);
         twitchClient.close();
+    }
+
+    private String getChannelID(String channelName){
+        List<String> userNamesArgs = new LinkedList<>();
+        userNamesArgs.add(channelName);
+        UserList users = twitchClient.getHelix().getUsers(Constants.Tokens.ACCESS_TOKEN, null, userNamesArgs).execute();
+        return users.getUsers().size() == 0 ? null : users.getUsers().get(0).getId();
     }
     
     private class JoinChannels extends OneShotBehaviour{
@@ -79,7 +90,7 @@ public class HelixAgent extends Agent{
             twitchClient.getEventManager().onEvent(ChatModerationEvent.class, event -> {
                 if (Constants.BOT_NAME.equals(event.getData().getCreatedBy())) return;
                 
-                System.out.println("Se ha realizado un: " + event.getData().getModerationAction().ordinal());//TODO
+                System.out.println("Se ha realizado un: " + event.getData().getModerationAction().name());//TODO
                 
                 events.add(buildActionDataModerationFromEvent(event));
             });
@@ -217,26 +228,25 @@ public class HelixAgent extends Agent{
             String info;
             switch(infoRequested){
                 case "title": info = getStreamTitle(channelName); break;
-                case "subs": info = getTotalSubs(channelName); break;
+                case "clip": info = createClip(channelName); break;
                 default: info = null;
             }
-            System.out.println("HELIX INFO: " + info);
+            System.out.println("HELIX INFO: " + info); //TODO
             return info;
         }
         
         private String getStreamTitle(String channelName){
-            System.out.println("voy a buscar el titulo");//TODO
             List<String> channelArgs = new LinkedList<>();
-            channelArgs.add(channelName);
-            StreamList resultList = twitchClient.getHelix().getStreams(null, null, null, null, null, null, channelArgs, null).execute();
-            return resultList.getStreams().get(0).getTitle();
+            channelArgs.add(channelID);
+            StreamList resultList = twitchClient.getHelix().getStreams(Constants.Tokens.ACCESS_TOKEN, null, null, null, null, null, channelArgs, null).execute();
+            return resultList.getStreams().size() == 0 ? null : resultList.getStreams().get(0).getTitle();
         }
         
-        private String getTotalSubs(String channelName){
-            System.out.println("Voy a buscar las subs");//TODO
+        //TODO
+        private String createClip(String channelName){
             if(!channel.equals(channelName)) return null;
-            SubscriptionList resultList = twitchClient.getHelix().getSubscriptions(Constants.Tokens.ACCESS_TOKEN, channelName, null, null,null).execute();
-            return String.valueOf(resultList.getSubscriptions().size());
+            CreateClipList clips = twitchClient.getHelix().createClip(Constants.Tokens.ACCESS_TOKEN, "81795200", false).execute();
+            return null;
         }
         
         

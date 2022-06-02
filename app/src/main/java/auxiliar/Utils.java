@@ -45,7 +45,7 @@ public class Utils {
     public static void registerTwoServices(Agent agent, String name1, String type1, String name2, String type2){
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(agent.getAID());
-        dfd.addServices(buildServiceDescription(name1, type2));
+        dfd.addServices(buildServiceDescription(name1, type1));
         dfd.addServices(buildServiceDescription(name2, type2));
         
         try{
@@ -83,7 +83,7 @@ public class Utils {
     }
 
     public static ACLMessage buildInformMessage(AID receiver, String ontology, String content) throws IOException{
-        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+        ACLMessage msg = new ACLMessage(ACLMessage.QUERY_REF);
         msg.addReceiver(receiver);
         msg.setOntology(ontology);
         msg.setLanguage(new SLCodec().getName());

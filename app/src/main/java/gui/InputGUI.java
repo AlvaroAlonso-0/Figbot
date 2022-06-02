@@ -9,6 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.MouseInputAdapter;
@@ -29,6 +30,7 @@ public class InputGUI {
     private JTextField channelNameText;
     private JTextField channelIdText;
     private JCheckBox moderatorCheckBox;
+    private JOptionPane timeZone;
     private JButton accept;
 
     private Controller controller;
@@ -77,6 +79,7 @@ public class InputGUI {
         moderatorLabel.setBounds(25, 127, 160, 25);
         moderatorCheckBox.setBackground(BACKGROUND_COLOR);
         moderatorCheckBox.setBounds(140, 127, 18, 18);
+        timeZone = new JOptionPane();
         accept.setBounds(232, 127, 127, 25);
         background.add(channelNameLabel);
         background.add(channelNameText);
@@ -93,5 +96,9 @@ public class InputGUI {
                 frame.dispose();
            }
         });
+    }
+
+    public static void main(String [] args){
+        new InputGUI(null);
     }
 }
