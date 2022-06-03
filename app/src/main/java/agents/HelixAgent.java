@@ -10,9 +10,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 
-import com.github.twitch4j.helix.domain.CreateClipList;
 import com.github.twitch4j.helix.domain.StreamList;
 import com.github.twitch4j.helix.domain.UserList;
+import com.github.twitch4j.helix.domain.VideoList;
 import com.github.twitch4j.pubsub.events.ChatModerationEvent;
 
 import jade.core.AID;
@@ -62,7 +62,7 @@ public class HelixAgent extends Agent{
         twitchClient.getChat().leaveChannel(channel);
         twitchClient.close();
     }
-
+    
     private String getChannelID(String channelName){
         List<String> userNamesArgs = new LinkedList<>();
         userNamesArgs.add(channelName);
@@ -157,14 +157,14 @@ public class HelixAgent extends Agent{
             }
             //TODO acciones helix
             System.out.println("ME HAN PREGUNTADO PARA BANEAR A " + actionData.getModeration().getTarget());
-
+            
             switch(actionData.getAction()){
                 case Constants.Code.DO_BAN: doBan(msg, actionData.getModeration()); break;
                 case Constants.Code.DO_TIMEOUT:; doTimeout(msg, actionData.getModeration()); break;
                 default: refuseRequest(msg);
             }
         }
-
+        
         private void doBan(ACLMessage requestMessage, ModerationMessage mod){
             if(twitchClient.getChat().ban(channel, mod.getTarget(), "Figbot auto-ban: " + mod.getReason())){
                 acceptRequest(requestMessage);
@@ -173,7 +173,7 @@ public class HelixAgent extends Agent{
             }
             
         }
-
+        
         private void doTimeout(ACLMessage requestMessage, ModerationMessage mod){
             if(twitchClient.getChat().timeout(channel, mod.getTarget(), Duration.ofSeconds(mod.getTimeoutDuration()), "Figbot auto-timeout: " + mod.getReason())){
                 acceptRequest(requestMessage);
@@ -181,7 +181,7 @@ public class HelixAgent extends Agent{
                 refuseRequest(requestMessage);
             }
         }
-
+        
         private void acceptRequest(ACLMessage requestMessage){
             ACLMessage answer = requestMessage.createReply();
             answer.setPerformative(ACLMessage.AGREE);
@@ -218,8 +218,8 @@ public class HelixAgent extends Agent{
             if(channelName == null) return null;
             String info;
             switch(infoRequested){
-                case "title": info = getStreamTitle(channelName); break;
-                case "clip": info = createClip(channelName); break;
+                case Constants.Commands.TITLE: info = getStreamTitle(channelName); break;
+                case Constants.Commands.CLIP: info = getLastVideoURL(channelName); break;
                 default: info = null;
             }
             System.out.println("HELIX INFO: " + info); //TODO
@@ -230,14 +230,12 @@ public class HelixAgent extends Agent{
             List<String> channelArgs = new LinkedList<>();
             channelArgs.add(channelID);
             StreamList resultList = twitchClient.getHelix().getStreams(Constants.Tokens.ACCESS_TOKEN, null, null, null, null, null, channelArgs, null).execute();
-            return resultList.getStreams().size() == 0 ? null : resultList.getStreams().get(0).getTitle();
+            return resultList.getStreams().isEmpty()? null : resultList.getStreams().get(0).getTitle();
         }
         
-        //TODO
-        private String createClip(String channelName){
-            if(!channel.equals(channelName)) return null;
-            CreateClipList clips = twitchClient.getHelix().createClip(Constants.Tokens.ACCESS_TOKEN, "81795200", false).execute();
-            return null;
+        private String getLastVideoURL(String channelName){
+            VideoList resultList = twitchClient.getHelix().getVideos(null, null, getChannelID(channelName), null, null, null, "time", null, null, null, 1).execute();
+            return resultList.getVideos().isEmpty() ?  null : resultList.getVideos().get(0).getUrl();
         }
         
         
