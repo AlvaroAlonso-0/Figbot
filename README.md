@@ -14,8 +14,8 @@
 ***Figbot*** se trata de un bot inteligente para la ayuda a la moderación en los canales
 de *Twitch*. Está formado por un sistema multiagente que analiza los mensajes del chat
 de modo que cuando se encuentran mensajes ofensivos el propio bot bloqueará a los usuarios 
-ofensivos. Cuando no esté seguro de la acción a tomar expulsando temporalmente al usuario. 
-El bot también dispone de comandos propios que pueden ser listados usando `f!help`.
+ofensivos. Cuando no esté seguro de la acción a tomar, expulsará temporalmente al usuario. 
+El bot también dispone de comandos propios que pueden ser listados usando `f!help` en el chat.
 
 ## **Requisitos** ##
 
