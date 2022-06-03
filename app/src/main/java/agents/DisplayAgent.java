@@ -112,7 +112,7 @@ public class DisplayAgent extends Agent {
 
         private String getLocalTimeMessage(String channelName){
             LocalTime now = LocalTime.now(ZoneId.of(timeZone));
-            return String.format("@%s local time is %d:%d", channelName, now.getHour(), now.getMinute());
+            return String.format("@%s local time is %02d:%02d", channelName, now.getHour(), now.getMinute());
         }
 
         private String getClipURL(String channelName, String userName){

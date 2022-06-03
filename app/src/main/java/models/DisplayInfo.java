@@ -11,7 +11,7 @@ public class DisplayInfo {
     public DisplayInfo(int action, String message) {
         LocalTime time = LocalTime.now();
         this.action = action;
-        this.message = String.format("[%2d:%2d:%2d] - %s", time.getHour(), time.getMinute(), time.getSecond(), message);
+        this.message = String.format("[%02d:%02d:%02d] - %s", time.getHour(), time.getMinute(), time.getSecond(), message);
         
     }
 
@@ -29,7 +29,7 @@ public class DisplayInfo {
     }
 
     public boolean hasArgument() {
-        return argument != null;
+        return argument != null && !argument.isBlank();
     }
 
     public String getArgument() {

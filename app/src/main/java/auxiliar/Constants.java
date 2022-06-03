@@ -21,6 +21,7 @@ public class Constants {
         public static final String TIME = "time"; //f!hour -> streamer local time
         public static final String CLIP = "clip"; //f!subs -> number of subs
         public static final String TITLE = "title"; //f!title -> title of the stream
+        public static final String HELP = "help";   //f!help -> list of commands
     }
 
     public class Code {
@@ -33,6 +34,7 @@ public class Constants {
         public static final int TIME = 301;
         public static final int CLIP = 311;
         public static final int TITLE = 321;
+        public static final int HELP = 401;
         public static final int BAN = 900;
         public static final int UNBAN = 901;
         public static final int TIMEOUT = 902;

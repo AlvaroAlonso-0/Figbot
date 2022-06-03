@@ -32,28 +32,18 @@ public class DynamicPanelList extends JPanel{
         mainList.setBackground(Constants.Colors.BACKGROUND);
         add(new JScrollPane(mainList));
 
-        JButton add = new JButton("Clear");
-        add.addActionListener(new ActionListener() {
+        JButton clear = new JButton("Clear");
+        clear.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JPanel panel = new JPanel();
-                JLabel label = new JLabel("Hello");
-                label.setForeground(Color.BLACK);
-                label.setFont(new Font("Display", Font.BOLD, 12));
-                panel.add(label);
-                panel.setBackground(Color.BLACK);
-                panel.setBorder(new MatteBorder(0, 0, 1, 0, Color.WHITE));
-                GridBagConstraints gbc = new GridBagConstraints();
-                gbc.gridwidth = GridBagConstraints.REMAINDER;
-                gbc.weightx = 1;
-                gbc.fill = GridBagConstraints.HORIZONTAL;
-                mainList.add(panel, gbc, 0);
-
+                
+                mainList.removeAll();
+                mainList.add(aux,gbc);
                 validate();
                 repaint();
             }
         });
-        add(add, BorderLayout.SOUTH);
+        add(clear, BorderLayout.SOUTH);
     }
 
     public void addEvent(DisplayInfo info){
@@ -61,8 +51,6 @@ public class DynamicPanelList extends JPanel{
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        //gbc.ipadx = 10;
-        //gbc.ipady = 10;
         EmptyBorder border1 = new EmptyBorder(10, 10, 10, 0);
         JPanel panel = new JPanel(new GridBagLayout());
         JLabel label = new JLabel("\t" + info.getMessage());
@@ -89,15 +77,10 @@ public class DynamicPanelList extends JPanel{
             labelArgument.setBackground(panelColor.brighter());
             labelArgument.setForeground(Color.BLACK);
             labelArgument.setBorder(border2);
-            //argumentPanel.add();
             panel.add(labelArgument,gbc);
         }
-        
-        
         panel.setBorder(new MatteBorder(0, 0, 1, 0, Color.WHITE));
-        
         mainList.add(panel, gbc, 0);
-
         validate();
         repaint();
     }
