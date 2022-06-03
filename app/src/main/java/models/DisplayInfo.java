@@ -1,5 +1,7 @@
 package models;
 
+import java.time.LocalTime;
+
 public class DisplayInfo {
     
     private int action;
@@ -13,8 +15,9 @@ public class DisplayInfo {
     }
 
     public DisplayInfo(int action, String message, String argument) {
+        LocalTime time = LocalTime.now();
         this.action = action;
-        this.message = message;
+        this.message = String.format("[%d:%d:%d] - %s", time.getHour(), time.getMinute(), time.getSecond(), message);
         this.argument = argument;
     }
 
