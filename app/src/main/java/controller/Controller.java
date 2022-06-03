@@ -20,17 +20,15 @@ public class Controller {
         return channelName;
     }
 
-    public void loadDisplayGui(String channelName){
+    public void loadDisplayGui(String channelName,String timeZone){
         this.channelName = channelName;
         displayGui = new DisplayGUI(channelName);
         //TODO
-        figb0t.start(channelName);
+        figb0t.start(channelName,timeZone);
     }
 
     public synchronized void displayModerationEvent(DisplayInfo info){
-
-        String event = String.format("%s - %s - %s", info.getAction(), info.getMessage(), info.getArgument());
-        displayGui.newEvent(event);
+        displayGui.newEvent(info);
     }
 
     //TODO

@@ -5,6 +5,8 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
+import models.DisplayInfo;
+
 public class DisplayGUI {
 
     private JFrame frame;
@@ -25,8 +27,8 @@ public class DisplayGUI {
     }
 
     
-    public void newEvent(String event){
-        events.addEvent(event);
+    public void newEvent(DisplayInfo info){
+        events.addEvent(info);
     }
 
     //TODO borrar?

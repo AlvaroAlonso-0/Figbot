@@ -1,6 +1,7 @@
 package auxiliar;
 
 import java.util.TimeZone;
+import java.awt.Color;
 
 public class Constants {
 
@@ -53,11 +54,20 @@ public class Constants {
         public static final String SLOW_OFF = "disabled slow mode";
     }
 
-    //TODO terminar - posible conflicto con hora de verano
     public static class TIMES{
         public static final String [] ZONES = {"GMT+12", "GMT+11", "GMT+10", "GMT+9:30", "GMT+9", "GMT+8", "GMT+7", "GMT+6", "GMT+5:30", "GMT+5", "GMT+4", "GMT+3", "GMT+2", "GMT+1", "GMT", "GMT-1", "GMT-3", "GMT-4", "GMT-5", "GMT-6", "GMT-7", "GMT-8", "GMT-10","GMT-11"};
         public static final String [] FORBIDDEN = {"CET", "CST6CDT","EET", "EST5EDT", "GB", "GB-Eire", "Greenwich", "MET", "MST7MDT", "NZ", "NZ-CHAT", "PRC", "PST8PDT", "ROK", "UCT", "UTC", "Universal", "W-SU", "WET"};
-        //public static final String[] CITIES = {"Wellington", "New-Caledonia", "Melbourne / EST", "Darwin / CST", "Seúl", "Hongkong / WST", "Bangkok", "Almaty", "Nueva Delhi", "Ashgabad", "Moscú / MSK", "Helsinki"};
         public static final String [] CITIES = TimeZone.getAvailableIDs();
     }
+
+    public static class Colors {
+
+        public static final Color BACKGROUND = new Color(171,184,195);
+
+        public static final Color BAN = new Color(236,14,17);   //ROJO
+        public static final Color UNBAN = new Color(00,208,132);//VERDE
+        public static final Color TIMEOUT = new Color(255,111,0);//NARANJA
+        public static final Color INFO = new Color(255,235,59); // AMARILLO
+    }
+
 }

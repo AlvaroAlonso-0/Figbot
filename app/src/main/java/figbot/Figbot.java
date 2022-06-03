@@ -45,7 +45,7 @@ public class Figbot {
     private void addDefaultAgents() throws StaleProxyException{
         agents.put("command", container.createNewAgent("procesadorCommand", "agents.CommandProcessAgent", null));
         agents.put("caps", container.createNewAgent("procesadorCaps", "agents.CapsProcessAgent", null));
-        agents.put("emotion", container.createNewAgent("procesadorEmotions", "agents.EmotionsProcessAgent", null));
+        //agents.put("emotion", container.createNewAgent("procesadorEmotions", "agents.EmotionsProcessAgent", null));
     }
     
     private void addVariableDependantAgents(String[] channelArgs, String[] displayArgs) throws StaleProxyException{

@@ -84,7 +84,7 @@ public class InputGUI {
         frame.getContentPane().add(background);
         accept.addMouseListener(new MouseInputAdapter() {
            public void mouseReleased(MouseEvent e){
-                controller.loadDisplayGui(channelNameText.getText());
+                controller.loadDisplayGui(channelNameText.getText(),timeZone.getSelectedItem().toString());
                 frame.setVisible(false);
                 frame.dispose();
            }

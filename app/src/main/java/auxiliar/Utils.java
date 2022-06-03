@@ -19,7 +19,7 @@ import models.TwitchMessage;
 
 public class Utils {
 
-    private static final int LINE_LENGTH = 250;
+    private static final int LINE_LENGTH = 135;
 
     public static OAuth2Credential generateCredential(){
         return new OAuth2Credential("twitch", Constants.Tokens.ACCESS_TOKEN);
