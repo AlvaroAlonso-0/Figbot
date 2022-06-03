@@ -20,10 +20,10 @@ public class Figbot {
         agents = new HashMap<>();
     }
 
-    public void start(String channelName){
+    public void start(String channelName, String timeZone){
         try {
             String[] channelArgs = {channelName};
-            String[] displayArgs = {"Europe/Paris"};//TODO
+            String[] displayArgs = {timeZone};
             addDefaultAgents();
             addVariableDependantAgents(channelArgs, displayArgs);
             startAgents();
