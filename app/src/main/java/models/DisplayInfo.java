@@ -9,15 +9,14 @@ public class DisplayInfo {
     private String argument;
     
     public DisplayInfo(int action, String message) {
+        LocalTime time = LocalTime.now();
         this.action = action;
-        this.message = message;
-        this.argument = null;
+        this.message = String.format("[%2d:%2d:%2d] - %s", time.getHour(), time.getMinute(), time.getSecond(), message);
+        
     }
 
     public DisplayInfo(int action, String message, String argument) {
-        LocalTime time = LocalTime.now();
-        this.action = action;
-        this.message = String.format("[%d:%d:%d] - %s", time.getHour(), time.getMinute(), time.getSecond(), message);
+        this(action,message);
         this.argument = argument;
     }
 
