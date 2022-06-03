@@ -19,6 +19,8 @@ import models.TwitchMessage;
 
 public class Utils {
 
+    private static final int LINE_LENGTH = 250;
+
     public static OAuth2Credential generateCredential(){
         return new OAuth2Credential("twitch", Constants.Tokens.ACCESS_TOKEN);
     }
@@ -99,5 +101,17 @@ public class Utils {
         mm.setTarget(tm.getUserName());
         mm.setReason(tm.getMessage());
         return mm;
+    }
+
+    public static String getDisplayFormat(String origin){
+        int lines = 1 + origin.length()/LINE_LENGTH;
+        StringBuilder displayFormat = new StringBuilder("<html>");
+        for (int i = 0; i < lines-1; i++) {
+            displayFormat.append(origin.substring(LINE_LENGTH*i, LINE_LENGTH*(i+1)));
+            displayFormat.append("<br>");
+        }
+        displayFormat.append(origin.substring(LINE_LENGTH*(lines-1)));
+        displayFormat.append("</html>");
+        return displayFormat.toString();
     }
 }
