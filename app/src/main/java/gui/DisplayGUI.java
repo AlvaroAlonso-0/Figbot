@@ -14,7 +14,7 @@ public class DisplayGUI {
     
     public DisplayGUI(String channelName){
         frame = new JFrame("Figbot - " + channelName);
-        ImageIcon icon = new ImageIcon("src/main/resources/figbot.png");
+        ImageIcon icon = new ImageIcon(this.getClass().getClassLoader().getResource("figbot.png"));
         frame.setIconImage(icon.getImage());
         events = new DynamicPanelList();
         frame.setSize(new Dimension(900, 900));

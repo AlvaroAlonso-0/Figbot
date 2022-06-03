@@ -46,7 +46,7 @@ public class InputGUI {
 
     private void setupFrame() {
         frame = new JFrame("Figbot");
-        ImageIcon icon = new ImageIcon("src/main/resources/figbot.png");
+        ImageIcon icon = new ImageIcon(this.getClass().getClassLoader().getResource("figbot.png"));
         frame.setIconImage(icon.getImage());
         frame.setSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));
         frame.getContentPane().setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));            

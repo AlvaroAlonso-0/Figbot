@@ -58,7 +58,7 @@ public class CommandProcessAgent extends Agent{
                         actionData.setArgument(splited_msg[1]);
                     }
                     break;
-                case Constants.Commands.SHOUTOUT : ret = Constants.Code.SHOUTOUT; actionData.setArgument(splited_msg[1]); break;
+                case Constants.Commands.SHOUTOUT : ret = Constants.Code.SHOUTOUT; actionData.setArgument(splited_msg.length == 1 ? holder.getTwitchMessage().getUserName() : splited_msg[1]); break;
                 case Constants.Commands.DICE  :
                     if (splited_msg.length == 1){
                         ret = Constants.Code.DICE_DEFAULT;

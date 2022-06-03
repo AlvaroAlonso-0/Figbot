@@ -1,8 +1,8 @@
 package agents;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -34,7 +34,6 @@ public class EmotionsProcessAgent extends Agent{
     @Override
     protected void setup(){
         Utils.registerOneService(this, "procesador-de-emociones", "procesar-mensajes");
-        
         holder = new TwitchMessageHolder();
         actionData = new ActionDataModeration();
         fillSwearWords();
@@ -47,7 +46,8 @@ public class EmotionsProcessAgent extends Agent{
         swearWords = new LinkedHashSet<>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader("src/main/resources/swearwords.txt"));
+            InputStreamReader input = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("swearwords.txt"));
+            reader = new BufferedReader(input);
             String line = reader.readLine();
             while (line != null) {
                 swearWords.add(line);
@@ -107,7 +107,6 @@ public class EmotionsProcessAgent extends Agent{
             Annotation annotation = tokenizer.process(mensaje);
             pipeline.annotate(annotation);
             for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-                System.out.println(sentence.get(SentimentCoreAnnotations.SentimentClass.class));
                 if("Very negative".equals(sentence.get(SentimentCoreAnnotations.SentimentClass.class))){
                     return true;
                 }

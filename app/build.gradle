@@ -51,12 +51,19 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.jar {
-    manifest.attributes["Main-Class"] = "figbot.App"
-    manifest.attributes["Class-Path"] = configurations
-        .runtimeClasspath
-        .get()
-        .joinToString(separator = " ") { file ->
-            "libs/${file.name}"
-        }
+mainClassName = "figbot.App"
+
+
+jar {
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest { 
+        attributes "Main-Class": "$mainClassName"
+    }  
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
+
