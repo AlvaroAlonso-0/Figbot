@@ -1,4 +1,4 @@
-/*package agents;
+package agents;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -117,8 +117,9 @@ public class EmotionsProcessAgent extends Agent{
         
         private int ratioSwearWord(String message, int length){
             int nSwearWords = 0;
+            message = message.toLowerCase();
             for (String word : swearWords){
-                if (message.contains(word+" ")) {
+                if (message.contains(word+" ") || message.equals(word)) {
                     nSwearWords++;
                 }
             }
@@ -127,4 +128,3 @@ public class EmotionsProcessAgent extends Agent{
         
     }
 }
-*/

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.function.Predicate;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -45,6 +46,8 @@ public class InputGUI {
 
     private void setupFrame() {
         frame = new JFrame("Figbot");
+        ImageIcon icon = new ImageIcon("src/main/resources/figbot.png");
+        frame.setIconImage(icon.getImage());
         frame.setSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));
         frame.getContentPane().setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));            
         frame.setLocationRelativeTo(null);         
@@ -80,7 +83,6 @@ public class InputGUI {
         background.add(channelIdLabel);
         background.add(timeZone);
         background.add(accept);
-        System.out.println(channelNameText.getFont());
         frame.getContentPane().add(background);
         accept.addMouseListener(new MouseInputAdapter() {
            public void mouseReleased(MouseEvent e){
@@ -89,10 +91,11 @@ public class InputGUI {
                 frame.dispose();
            }
         });
+        
     }
 
     private String [] getTimeZones(){
-        List<String> forbidden = Arrays.asList(Constants.TIMES.FORBIDDEN);
+        List<String> forbidden = Arrays.asList(Constants.Times.FORBIDDEN);
         String[] posibleLabels = Arrays.asList(TimeZone.getAvailableIDs()).stream().filter(new Predicate<String>() {
             @Override
             public boolean test(String t) {

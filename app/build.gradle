@@ -24,7 +24,7 @@ dependencies {
     implementation 'com.google.guava:guava:30.1.1-jre'
 
     // Twitch API for Java
-    implementation group: 'com.github.twitch4j', name: 'twitch4j', version: '1.9.0'
+    implementation group: 'com.github.twitch4j', name: 'twitch4j', version: '1.10.0'
 
     // JADE lib
     implementation files('lib/jade.jar')
@@ -34,9 +34,8 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
 
     // Stanford NLP
-
-    //implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0'
-    //implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0', classifier: 'models'
+    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0'
+    implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.4.0', classifier: 'models'
 }
 
 apply plugin: "java"
@@ -50,4 +49,14 @@ application {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+tasks.jar {
+    manifest.attributes["Main-Class"] = "figbot.App"
+    manifest.attributes["Class-Path"] = configurations
+        .runtimeClasspath
+        .get()
+        .joinToString(separator = " ") { file ->
+            "libs/${file.name}"
+        }
 }

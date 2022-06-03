@@ -1,8 +1,8 @@
 package gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import models.DisplayInfo;
@@ -14,6 +14,8 @@ public class DisplayGUI {
     
     public DisplayGUI(String channelName){
         frame = new JFrame("Figbot - " + channelName);
+        ImageIcon icon = new ImageIcon("src/main/resources/figbot.png");
+        frame.setIconImage(icon.getImage());
         events = new DynamicPanelList();
         frame.setSize(new Dimension(900, 900));
         frame.getContentPane().setPreferredSize(new Dimension(900, 900));            
@@ -22,17 +24,11 @@ public class DisplayGUI {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        //events.setBackground(Color.BLACK);
         frame.add(events);
     }
 
     
     public void newEvent(DisplayInfo info){
         events.addEvent(info);
-    }
-
-    //TODO borrar?
-    public static void main (String [] args){
-        new DisplayGUI("rayo106");
     }
 }

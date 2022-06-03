@@ -82,10 +82,7 @@ public class HelixAgent extends Agent{
         public void action() {
             twitchClient.getPubSub().listenForModerationEvents(oauth, Constants.Tokens.USER_ID, channelID);
             twitchClient.getEventManager().onEvent(ChatModerationEvent.class, event -> {
-                if (Constants.BOT_NAME.equals(event.getData().getCreatedBy())) return;
-                
-                System.out.println("Se ha realizado un: " + event.getData().getModerationAction().name());//TODO
-                
+                if (Constants.BOT_NAME.equals(event.getData().getCreatedBy())) return;                
                 events.add(buildActionDataModerationFromEvent(event));
             });
         }
@@ -155,8 +152,6 @@ public class HelixAgent extends Agent{
                 refuseRequest(msg);
                 return;
             }
-            //TODO acciones helix
-            System.out.println("ME HAN PREGUNTADO PARA BANEAR A " + actionData.getModeration().getTarget());
             
             switch(actionData.getAction()){
                 case Constants.Code.DO_BAN: doBan(msg, actionData.getModeration()); break;
@@ -219,10 +214,9 @@ public class HelixAgent extends Agent{
             String info;
             switch(infoRequested){
                 case Constants.Commands.TITLE: info = getStreamTitle(channelName); break;
-                case Constants.Commands.CLIP: info = getLastVideoURL(channelName); break;
+                case Constants.Commands.VIDEO: info = getLastVideoURL(channelName); break;
                 default: info = null;
             }
-            System.out.println("HELIX INFO: " + info); //TODO
             return info;
         }
         
@@ -234,7 +228,7 @@ public class HelixAgent extends Agent{
         }
         
         private String getLastVideoURL(String channelName){
-            VideoList resultList = twitchClient.getHelix().getVideos(null, null, getChannelID(channelName), null, null, null, "time", null, null, null, 1).execute();
+            VideoList resultList = twitchClient.getHelix().getVideos(Constants.Tokens.ACCESS_TOKEN, null, getChannelID(channelName), null, null, null, "time", null, null, null, 1).execute();
             return resultList.getVideos().isEmpty() ?  null : resultList.getVideos().get(0).getUrl();
         }
         

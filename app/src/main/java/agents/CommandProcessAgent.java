@@ -68,8 +68,9 @@ public class CommandProcessAgent extends Agent{
                     }
                     break;
                 case Constants.Commands.TIME  : ret = Constants.Code.TIME; break;
-                case Constants.Commands.CLIP  : ret = Constants.Code.CLIP; break;
+                case Constants.Commands.VIDEO : ret = Constants.Code.VIDEO; actionData.setArgument(splited_msg.length == 1 ? holder.getTwitchMessage().getChannelName() : splited_msg[1]); break;
                 case Constants.Commands.TITLE : ret = Constants.Code.TITLE; break;
+                case Constants.Commands.HELP : ret = Constants.Code.HELP; break;
                 default: ret = Constants.Code.ERROR;
             }
             return ret;

@@ -19,7 +19,7 @@ public class Constants {
         public static final String SHOUTOUT = "shoutout"; //f!shoutout @user
         public static final String DICE = "dice"; //default 6, f!dice n
         public static final String TIME = "time"; //f!hour -> streamer local time
-        public static final String CLIP = "clip"; //f!subs -> number of subs
+        public static final String VIDEO = "video"; //f!subs -> number of subs
         public static final String TITLE = "title"; //f!title -> title of the stream
         public static final String HELP = "help";   //f!help -> list of commands
     }
@@ -32,7 +32,7 @@ public class Constants {
         public static final int DICE_DEFAULT = 201; 
         public static final int DICE_N = 202; 
         public static final int TIME = 301;
-        public static final int CLIP = 311;
+        public static final int VIDEO = 311;
         public static final int TITLE = 321;
         public static final int HELP = 401;
         public static final int BAN = 900;
@@ -56,8 +56,7 @@ public class Constants {
         public static final String SLOW_OFF = "disabled slow mode";
     }
 
-    public static class TIMES{
-        public static final String [] ZONES = {"GMT+12", "GMT+11", "GMT+10", "GMT+9:30", "GMT+9", "GMT+8", "GMT+7", "GMT+6", "GMT+5:30", "GMT+5", "GMT+4", "GMT+3", "GMT+2", "GMT+1", "GMT", "GMT-1", "GMT-3", "GMT-4", "GMT-5", "GMT-6", "GMT-7", "GMT-8", "GMT-10","GMT-11"};
+    public static class Times{
         public static final String [] FORBIDDEN = {"CET", "CST6CDT","EET", "EST5EDT", "GB", "GB-Eire", "Greenwich", "MET", "MST7MDT", "NZ", "NZ-CHAT", "PRC", "PST8PDT", "ROK", "UCT", "UTC", "Universal", "W-SU", "WET"};
         public static final String [] CITIES = TimeZone.getAvailableIDs();
     }
@@ -66,7 +65,7 @@ public class Constants {
 
         public static final Color BACKGROUND = new Color(171,184,195);
 
-        public static final Color BAN = new Color(236,14,17);   //ROJO
+        public static final Color BAN = new Color(235,20,76);   //ROJO
         public static final Color UNBAN = new Color(00,208,132);//VERDE
         public static final Color TIMEOUT = new Color(255,111,0);//NARANJA
         public static final Color INFO = new Color(255,235,59); // AMARILLO

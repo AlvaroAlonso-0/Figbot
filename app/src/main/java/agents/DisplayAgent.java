@@ -71,12 +71,25 @@ public class DisplayAgent extends Agent {
                 case 1: message = userResponse(actionData.getAction()%100); break;
                 case 2: message = dice(actionData.getAction()%100); break;
                 case 3: message = streamInfo(actionData.getAction()%100); break;
+                case 4: message = help(); break;
                 default: return;
             }
             if(message != null){
                 twitchClient.getChat().sendMessage(((ActionDataMessage) actionData).getMessage().getChannelName(), message);
             }
-        }        
+        }
+
+        private String help(){
+            String res = " -------------------------------------" + 
+                         "------------------f!greetings [user]--------------" +
+                         "------------------f!shoutout [user]---------------" +
+                         "--------------------f!dice [sides]----------------" +
+                         "------------------------f!time--------------------" +
+                         "--------------------f!video [user]----------------" +
+                         "------------------------f!title-------------------" +
+                         "--------------------------------------------------";
+            return res;
+        }
         
         private String userResponse(int code) {
             ActionDataMessage message = (ActionDataMessage) actionData;
@@ -103,7 +116,7 @@ public class DisplayAgent extends Agent {
             String res;
             switch(code){
                 case 1: res = getLocalTimeMessage(message.getMessage().getChannelName()); break;   
-                case 11: res = getClipURL(message.getMessage().getChannelName(),message.getMessage().getUserName()); break;
+                case 11: res = getVideoURL(message.getArgument()); break;
                 case 21: res = getTitleMessage(message.getMessage().getChannelName()); break;
                 default: res = null;    
             }
@@ -115,7 +128,7 @@ public class DisplayAgent extends Agent {
             return String.format("@%s local time is %02d:%02d", channelName, now.getHour(), now.getMinute());
         }
 
-        private String getClipURL(String channelName, String userName){
+        private String getVideoURL(String channelName){
             AID[] helixAgents = null;
             try{
                 DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("helix"));
@@ -132,7 +145,7 @@ public class DisplayAgent extends Agent {
             try {
                 for(int i = 0; i < helixAgents.length; i++){
 
-                    send(Utils.buildInformMessage(helixAgents[i], "clip", channelName));
+                    send(Utils.buildInformMessage(helixAgents[i], Constants.Commands.VIDEO, channelName));
                     msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
                     if(msg.getPerformative() == ACLMessage.INFORM_REF) break;
                 }
@@ -140,7 +153,7 @@ public class DisplayAgent extends Agent {
                 System.err.println("No se pudo enviar el mensaje");
                 e.printStackTrace();
             }
-            return (msg == null || msg.getContent() == null) ? null : String.format("@%s has created a clip! -> %s", userName, msg.getContent());
+            return (msg == null || msg.getContent() == null) ? null : String.format("@%s's last video! -> %s", channelName, msg.getContent());
         }
  
         private String getTitleMessage(String channelName){
@@ -160,7 +173,7 @@ public class DisplayAgent extends Agent {
             try {
                 for(int i = 0; i < helixAgents.length; i++){
 
-                    send(Utils.buildInformMessage(helixAgents[i], "title", channelName));
+                    send(Utils.buildInformMessage(helixAgents[i], Constants.Commands.TITLE, channelName));
                     msg = blockingReceive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)));
                     if(msg.getPerformative() == ACLMessage.INFORM_REF) break;
                 }
@@ -178,9 +191,7 @@ public class DisplayAgent extends Agent {
         public void action() {
             if (actionData.getAction() < Constants.Code.BAN || actionData.getAction() == Constants.Code.ERROR) return;
             ActionDataModeration mod = (ActionDataModeration) actionData;
-            System.out.println("fuera del if");//TODO
             if(mod.getAction()/10 == 91){
-                System.out.println("DENTRO del if");//TODO
                 if(!askHelix()) return;
                 mod.setAction(mod.getAction()-10);
             }
@@ -222,7 +233,6 @@ public class DisplayAgent extends Agent {
             try{
                 DFAgentDescription[] result = DFService.search(myAgent, Utils.builDFAgentDescriptionFromType("moderar-canal"));
                 helixAgents = new AID[result.length];
-                System.out.println("size = " + result.length);
                 for(int i=0; i<result.length; i++){
                     helixAgents[i] = result[i].getName();
                 }
@@ -231,7 +241,6 @@ public class DisplayAgent extends Agent {
             }
 
             if(helixAgents == null || helixAgents.length == 0) return false; // add log
-            System.out.println("ha pasado el if");
             try {
                 for(int i = 0; i < helixAgents.length; i++){
                     send(Utils.buildRequestMessage(helixAgents[i], actionData));
@@ -246,7 +255,6 @@ public class DisplayAgent extends Agent {
             }
             return false;
         }
-        
     }
     
     public class Reset extends CyclicBehaviour{
@@ -255,6 +263,5 @@ public class DisplayAgent extends Agent {
         public void action() {
             actionData.setAction(Constants.Code.ERROR);
         }
-        
     }
 }

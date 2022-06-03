@@ -23,7 +23,6 @@ public class Controller {
     public void loadDisplayGui(String channelName,String timeZone){
         this.channelName = channelName;
         displayGui = new DisplayGUI(channelName);
-        //TODO
         figb0t.start(channelName,timeZone);
     }
 
@@ -31,7 +30,6 @@ public class Controller {
         displayGui.newEvent(info);
     }
 
-    //TODO
     public void closeApp(){
         figb0t.turnOff();
     }
