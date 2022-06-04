@@ -1,6 +1,8 @@
 package figbot;
 
 import jade.core.Runtime;
+import jade.util.ExtendedProperties;
+import jade.util.leap.Properties;
 import jade.core.ProfileImpl;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
@@ -16,7 +18,9 @@ public class Figbot {
 
     public Figbot() {
         Runtime runtime = jade.core.Runtime.instance();
-        container = runtime.createMainContainer(new ProfileImpl());
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.setProperty("gui", "true");
+        container = runtime.createMainContainer(new ProfileImpl((Properties) extendedProperties));
         agents = new HashMap<>();
     }
 
