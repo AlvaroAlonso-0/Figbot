@@ -17,7 +17,7 @@ public class LoopAnnounceAgent extends Agent {
         addBehaviour(new TickerBehaviour(this,300000){ // 5 minutes
             @Override
             protected void onTick() {
-                twitchClient.getChat().sendAnnouncement(getArguments()[0].toString(), "Type f!help to find all commands available. Remember to behave politely with other users in chat!");
+                twitchClient.getChat().sendAnnouncement(getArguments()[0].toString(), "Type f!help to display all available commands. Remember to behave politely with other users!");
             }   
         });
     }

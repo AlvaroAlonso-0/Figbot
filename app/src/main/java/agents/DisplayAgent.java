@@ -98,7 +98,7 @@ public class DisplayAgent extends Agent {
             switch(code/10){
                 case 0: res = String.format(GREETINGS_MESSAGES[n], code%10 == 1 ? (message.getMessage().getUserName()) : message.getArgument()); break;
                 case 1: res = String.format("Check out @%s channel! -> twitch.tv/%s", message.getArgument(), message.getArgument()); break;
-                case 2: res = String.format("Please @%s, do not use a lot of caps",message.getMessage().getUserName()); break;
+                case 2: res = String.format("Please @%s, don't use that much caps!",message.getMessage().getUserName()); break;
                 default: res = "";
             }
             return res;
